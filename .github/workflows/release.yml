@@ -1,0 +1,72 @@
+name: Release extension
+
+# Tag format: ext-<slug>-v<version>  (slug may contain dashes; version is
+# everything after the LAST -v). Example: ext-form-flow-builder-v1.2.0
+
+on:
+  push:
+    tags: ["ext-*-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse tag → slug + version
+        id: meta
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          SLUG="$(echo "$TAG" | sed -E 's/^ext-(.+)-v([^-].*)$/\1/')"
+          VER="$(echo "$TAG" | sed -E 's/^ext-(.+)-v([^-].*)$/\2/')"
+          if [ -z "$SLUG" ] || [ "$SLUG" = "$TAG" ]; then
+            echo "::error::Cannot parse slug from tag: $TAG"
+            exit 1
+          fi
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "Parsed: slug=$SLUG version=$VER"
+
+      - name: Verify extension exists and version matches
+        run: |
+          DIR="extensions/${{ steps.meta.outputs.slug }}"
+          if [ ! -f "$DIR/fleekdash.json" ]; then
+            echo "::error::No fleekdash.json in $DIR"
+            exit 1
+          fi
+          MVER="$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$DIR/fleekdash.json" | head -1 | sed -E 's/.*"([^"]*)"$/\1/')"
+          if [ "$MVER" != "${{ steps.meta.outputs.version }}" ]; then
+            echo "::error::Manifest version '$MVER' != tag version '${{ steps.meta.outputs.version }}'"
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate manifest against schema
+        run: |
+          pip install check-jsonschema
+          check-jsonschema --schemafile schema/fleekdash-manifest.schema.json \
+            "extensions/${{ steps.meta.outputs.slug }}/fleekdash.json"
+
+      - name: Zip extension
+        run: |
+          cd extensions
+          zip -r "../${{ steps.meta.outputs.slug }}-v${{ steps.meta.outputs.version }}.zip" \
+            "${{ steps.meta.outputs.slug }}" \
+            -x "*/node_modules/*" -x "*/.git/*" -x "*/.env*" -x "*/tests/*"
+          cd ..
+          ls -lh *.zip
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ steps.meta.outputs.slug }} v${{ steps.meta.outputs.version }}" \
+            --generate-notes \
+            "${{ steps.meta.outputs.slug }}-v${{ steps.meta.outputs.version }}.zip"

@@ -1,0 +1,31 @@
+name: Validate manifests
+
+on:
+  pull_request:
+    paths: ["extensions/**"]
+  push:
+    branches: [main]
+    paths: ["extensions/**"]
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install check-jsonschema
+        run: pip install check-jsonschema
+
+      - name: Validate every extension manifest
+        run: |
+          failed=0
+          for manifest in extensions/*/fleekdash.json; do
+            [ -f "$manifest" ] || continue
+            echo "== $manifest"
+            check-jsonschema --schemafile schema/fleekdash-manifest.schema.json "$manifest" || failed=1
+          done
+          exit $failed

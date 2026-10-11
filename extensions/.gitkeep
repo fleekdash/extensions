@@ -1,0 +1,3 @@
+# One directory per OSS extension: extensions/<slug>/
+# Each ships a fleekdash.json manifest + plugin bootstrap.
+# See README.md for the manifest spec and release flow.
