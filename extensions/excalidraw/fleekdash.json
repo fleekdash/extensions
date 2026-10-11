@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schema/fleekdash-manifest.schema.json",
+  "kind": "app",
+  "id": "excalidraw",
+  "name": "Excalidraw",
+  "description": "Advanced native drawing tool for FleekDash — iframe editor route.",
+  "version": "1.1.0",
+  "author": "FleekDash",
+  "author_uri": "https://fleekdash.com",
+  "icon": "edit",
+  "category": "plugin",
+  "requires": {
+    "wp": "6.5",
+    "php": "8.0",
+    "fleekdash": "2.6.7"
+  },
+  "tags": ["drawing", "editor", "reference"]
+}

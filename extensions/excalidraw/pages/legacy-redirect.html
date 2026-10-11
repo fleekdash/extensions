@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <script>
+      (function redirectToBuiltEditor() {
+        var locationRef = globalThis.location;
+        if (!locationRef) return;
+        var target =
+          new URL("../dist/pages/editor.html", locationRef.href).href +
+          locationRef.search;
+        locationRef.replace(target);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to Excalidraw editor…</p>
+  </body>
+</html>

@@ -15,8 +15,19 @@ extensions/<slug>/
 ├── fleekdash.json      ← required — kind/id/name + optional settings/sections/requires
 ├── <slug>.php          ← plugin bootstrap (Requires Plugins: fleekdash)
 └── ...                 ← extension code (PHP, built assets committed or built by CI)
+contracts/              ← vendored @fleekdash/contracts (workspace package — see note)
 schema/                 ← vendored fleekdash.json JSON Schema (see note below)
 ```
+
+This repo is a **pnpm workspace** (`contracts` + `extensions/*`). Extension
+UI code imports the typed contract surface as
+`"@fleekdash/contracts": "workspace:*"` — manifest types, `FleekDashSdk`,
+`getFleekDashSdk()`, `getBrowserWindow()`. Until the package ships to npm,
+`contracts/` is a vendored source-only copy: `pnpm install` at the root
+wires it to every extension.
+
+`dist/` is **committed** (WP svn convention) — the release zip ships the
+built iframe pages without needing a CI build step.
 
 ## Manifests
 
@@ -65,10 +76,15 @@ FleekDash update endpoint.
 
 ## Writing an extension
 
-Authoring guide, manifest field reference, SDK surface and migration
-playbook live in the FleekDash monorepo docs
-(`docs/future/integration-system/`). Until the public developer portal
-ships, start from `fleekdash/extension-starter` when it is published.
+Start from [`fleekdash/extension-starter`](https://github.com/fleekdash/extension-starter)
+— it is the same shape this repo uses (`fleekdash.json` + Registry routes +
+typed SDK via `@fleekdash/contracts`). Authoring guide, manifest field
+reference and the migration playbook live in the FleekDash monorepo docs
+(`docs/future/integration-system/`) until the public developer portal ships.
+
+To add an extension here: `extensions/<slug>/` + `fleekdash.json` +
+`pnpm install` at the root + a `typecheck`/`build` script — CI validates
+the manifest on every PR.
 
 ## License
 

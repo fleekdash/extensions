@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excalidraw Library Import</title>
+    <script>
+      (function redirectLibraryImportToFleekDash() {
+        var INTEGRATION_ID = "excalidraw";
+        var STORAGE_KEY =
+          "fleekdash:integration:pending-iframe-hash:" + INTEGRATION_ID;
+        var fleekDashEditor =
+          globalThis.location.origin +
+          "/wp-admin/admin.php?page=fleekdash#/app/excalidraw/editor";
+
+        var rawHash = globalThis.location.hash || "";
+        var payload = rawHash.charAt(0) === "#" ? rawHash.slice(1) : rawHash;
+
+        if (payload && payload.includes("addLibrary=")) {
+          try {
+            globalThis.sessionStorage.setItem(STORAGE_KEY, payload);
+          } catch (error) {
+            console.warn("[Excalidraw] Could not store pending library import", error);
+          }
+        }
+
+        globalThis.location.replace(fleekDashEditor);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to FleekDash…</p>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "@fleekdash/contracts",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Public contract surface for FleekDash extensions: manifest types + JSON Schema, iframe SDK types, route/settings schemas, PHP API stubs.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./schema/fleekdash-manifest.schema.json",
+    "./php": "./php/fleekdash-extension-api.php"
+  }
+}

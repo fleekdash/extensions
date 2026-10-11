@@ -1,0 +1,8 @@
+{
+  "name": "fleekdash-extensions",
+  "private": true,
+  "description": "Open-source installable FleekDash extensions. Each extensions/<slug>/ is one WP plugin zipped by tag-triggered release CI.",
+  "scripts": {
+    "build:all": "pnpm -r --filter './extensions/*' build"
+  }
+}
