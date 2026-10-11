@@ -15,7 +15,6 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "types": ["vite/client"],
     "paths": {
       "@excalidraw/excalidraw": ["./node_modules/@excalidraw/excalidraw"],
