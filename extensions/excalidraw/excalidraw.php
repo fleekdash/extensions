@@ -37,11 +37,11 @@ function fleekdashExcalidrawRegisterIntegration(): void
         return;
     }
 
-    $distEditor = __DIR__ . '/dist/pages/editor.html';
-    $editorHtmlRelative = is_file($distEditor)
-        ? 'dist/pages/editor.html'
-        : 'pages/editor.html';
-    if (!is_file($distEditor) && function_exists('fleekdash_log_error')) {
+    // The manifest declares dist/pages/editor.html unconditionally — the
+    // pages/ source needs the vite dev server and is never servable on its
+    // own, so a pages/ fallback would only create parity drift.
+    $editorHtmlRelative = 'dist/pages/editor.html';
+    if (!is_file(__DIR__ . '/' . $editorHtmlRelative) && function_exists('fleekdash_log_error')) {
         fleekdash_log_error('[Excalidraw] Missing build output. Run pnpm run build in wp-content/plugins/excalidraw.');
     }
 

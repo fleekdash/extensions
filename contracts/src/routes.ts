@@ -9,7 +9,11 @@
  * manifest hash). Mirrors `ManifestRouteValidator` + `ManifestValidator`.
  */
 
-import type { FleekDashManifest, ManifestIcon } from "./manifest";
+import type {
+  ExtensionKind,
+  FleekDashManifest,
+  ManifestIcon,
+} from "./manifest";
 import type { SettingsSchema } from "./settings";
 
 /** iframe sandbox preset — mirrors ALLOWED_SANDBOX_MODES. */
@@ -62,4 +66,12 @@ export interface RegistryManifest {
   settings_schema?: SettingsSchema;
   settings_page_url?: string;
   requires?: FleekDashManifest["requires"];
+  /**
+   * Extension kind ("app" for route-bearing manifests). Persisted in the
+   * stored manifest — required for hash parity with the JSON writer
+   * during migration.
+   */
+  kind?: ExtensionKind;
+  /** Catalog/Hub tags — forward from fleekdash.json during migration. */
+  tags?: string[];
 }
