@@ -60,6 +60,7 @@ export interface RegistryManifest {
     | "premium-catalog";
   plugin_file: string;
   author?: string;
+  author_uri?: string;
   icon?: ManifestIcon;
   category?: string;
   routes?: IntegrationRoute[];

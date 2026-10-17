@@ -171,9 +171,12 @@ export interface FleekDashManifest {
    *
    * During migration the plugin may keep its imperative
    * `Registry::register()`; the imperative manifest must then carry the
-   * IDENTICAL routes array and every forwarded field (`kind`, `tags`,
+   * EQUIVALENT routes array and every forwarded field (`kind`, `tags`,
    * `description`, `requires`, …) so both writers produce the same
-   * stored manifest (zero extra writes). Once a release ships the JSON
+   * stored manifest (zero extra writes). "Equivalent" means identical
+   * path/title/icon/permissions/sandbox_mode, and a `component_url`
+   * already resolved to the absolute URL the sync produces (manifest
+   * dir + `fleekdash_sdk_url` appended). Once a release ships the JSON
    * routes, drop the PHP boilerplate: the sync owns registration and
    * reconciles `is_active` from `is_plugin_active()`.
    */
