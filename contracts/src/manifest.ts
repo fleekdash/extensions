@@ -84,6 +84,7 @@ export interface ManifestRequires {
 }
 
 import type { SettingsSchema } from "./settings";
+import type { IntegrationRoute } from "./routes";
 
 export interface FleekDashManifest {
   /** Required — one of the five extension kinds. */
@@ -150,4 +151,31 @@ export interface FleekDashManifest {
    * resolved to `connector_status` in the Hub.
    */
   connector_id?: string;
+
+  /**
+   * kind: app → registry runtime type; defaults to "standalone".
+   */
+  integration_type?:
+    | "native"
+    | "standalone"
+    | "hybrid"
+    | "internal"
+    | "mu-plugin"
+    | "premium-catalog";
+
+  /**
+   * kind: app → declarative iframe routes. `component_url` accepts a
+   * manifest-relative path ("dist/pages/editor.html"), a site-relative
+   * path ("/…"), or an http(s) URL; `fleekdash_sdk_url` is appended
+   * automatically at sync time.
+   *
+   * During migration the plugin may keep its imperative
+   * `Registry::register()` — the imperative manifest must then carry the
+   * IDENTICAL routes array and every forwarded field (`kind`, `tags`,
+   * `description`, `requires`, …) so both writers produce the same
+   * stored manifest (zero extra writes). Once a release ships the JSON
+   * routes, drop the PHP boilerplate: the sync owns registration and
+   * reconciles `is_active` from `is_plugin_active()`.
+   */
+  routes?: IntegrationRoute[];
 }

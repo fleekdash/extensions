@@ -1,10 +1,12 @@
 /**
- * Route + Registry manifest types — transitional surface.
+ * Route + Registry manifest types.
  *
- * `fleekdash.json` does not yet accept `routes`; kind:app registers them
- * through `FleekDash\Integration\Registry::register()` (PHP), whose array
- * shape is `RegistryManifest` below. Mirrors `ManifestRouteValidator` +
- * `ManifestValidator`.
+ * `fleekdash.json` accepts `routes` on kind: app manifests — the runtime
+ * sync maps them into the same `Registry::register()` array shape
+ * (`RegistryManifest` below). During migration a plugin may keep calling
+ * `Registry::register()` itself; the JSON `routes` must then be identical
+ * to the imperative array (parity contract — the sync produces the same
+ * manifest hash). Mirrors `ManifestRouteValidator` + `ManifestValidator`.
  */
 
 import type { FleekDashManifest, ManifestIcon } from "./manifest";
@@ -19,8 +21,11 @@ export interface IntegrationRoute {
   /** Required — menu/route label. */
   title: string;
   /**
-   * Required — the iframe UI. Leading "/" = relative to wp-content;
-   * otherwise a valid http(s) URL.
+   * Required — the iframe UI. In `fleekdash.json` a manifest-relative path
+   * ("dist/pages/editor.html") resolves against the manifest directory;
+   * a leading "/" is site-relative and http(s) URLs pass through.
+   * `fleekdash_sdk_url` is appended automatically at sync time — callers
+   * of `Registry::register()` must append it themselves for parity.
    */
   component_url: string;
   icon?: ManifestIcon;
@@ -30,16 +35,24 @@ export interface IntegrationRoute {
 }
 
 /**
- * Transitional manifest passed to `Registry::register()` for kind:app
- * until `routes` land in fleekdash.json. `settings_schema` is the legacy
- * key for what the JSON calls `settings` — same schema validator.
+ * Imperative manifest passed to `Registry::register()` — the shape the
+ * app-manifest sync produces from `fleekdash.json`. `settings_schema` is
+ * the legacy key for what the JSON calls `settings` — same schema
+ * validator. Keep the imperative call byte-identical to the JSON while
+ * both writers run (see `FleekDashManifest.routes`).
  */
 export interface RegistryManifest {
   integration_id: string;
   name: string;
   description?: string;
   version: string;
-  integration_type: "native" | "standalone" | "hybrid" | "internal" | "mu-plugin" | "premium-catalog";
+  integration_type:
+    | "native"
+    | "standalone"
+    | "hybrid"
+    | "internal"
+    | "mu-plugin"
+    | "premium-catalog";
   plugin_file: string;
   author?: string;
   icon?: ManifestIcon;

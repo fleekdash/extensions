@@ -58,19 +58,24 @@ if (false) {
 
 if (false) {
 	/**
-	 * Transitional route/registration API for kind:app until `routes` land
-	 * in fleekdash.json. Real calls:
+	 * Imperative route/registration API for kind:app — prefer declaring
+	 * `routes` in fleekdash.json (the runtime sync registers them).
+	 * Keep this call only during migration, with content identical to the
+	 * JSON so both writers produce the same stored manifest. Real calls:
 	 *
 	 *     FleekDash\Integration\Registry::register( array $manifest );
 	 *     FleekDash\Integration\Registry::unregister( string $id );
 	 *
 	 * $manifest shape (RegistryManifest):
 	 *   integration_id, name, version, integration_type, plugin_file,
-	 *   description?, author?, icon?, category?,
+	 *   description?, author?, icon?, kind => 'app', category?,
 	 *   routes[] => { path*, title*, component_url*, icon?, permissions?[], sandbox_mode? },
 	 *   settings_schema? => SettingsSchema map,
-	 *   settings_page_url?, requires?
+	 *   settings_page_url?, requires?, tags?
 	 *
+	 * component_url: callers of register() must append `fleekdash_sdk_url`
+	 * themselves — the JSON path resolves relative paths against the
+	 * manifest dir and appends it automatically.
 	 * Call register() on activation/init and unregister() on deactivation.
 	 * Sandbox modes: 'strict' | 'moderate' | 'none'.
 	 */

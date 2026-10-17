@@ -22,9 +22,14 @@ const FLEEKDASH_EXCALIDRAW_MIN_FD = '2.6.7';
 /**
  * Register/re-sync integration in FleekDash registry.
  *
- * Transitional model: `fleekdash.json` declares the extension (Hub card,
- * requirements); routes still go through Registry::register() until the
- * manifest absorbs them.
+ * Transitional model: `fleekdash.json` now declares routes too — FleekDash's
+ * app-manifest sync (plugins_loaded@90) re-registers them. This PHP
+ * register() stays during the transition and MUST mirror the manifest
+ * byte-for-byte on every forwarded field so both writers produce the
+ * identical manifest hash (parity contract: docs/future/integration-system/
+ * planning/extension-migration-playbook-08-out-2026.md step 2). Once a
+ * release ships the routes JSON, this boilerplate plus the lifecycle hooks
+ * below get dropped.
  */
 function fleekdashExcalidrawRegisterIntegration(): void
 {
@@ -48,21 +53,25 @@ function fleekdashExcalidrawRegisterIntegration(): void
     $manifest = [
         'integration_id' => FLEEKDASH_EXCALIDRAW_INTEGRATION_ID,
         'name' => 'Excalidraw',
-        'description' => 'Advanced native drawing tool for FleekDash',
+        'description' => 'Advanced native drawing tool for FleekDash — iframe editor route.',
         'version' => '1.1.0',
         'author' => 'FleekDash',
         'author_uri' => 'https://fleekdash.com',
         'integration_type' => 'standalone',
         'plugin_file' => plugin_basename(__FILE__),
         'icon' => 'edit',
+        'kind' => 'app',
         'source' => 'external',
         'source_label' => 'Plugin',
         'category' => 'plugin',
+        // Key order matters for the parity hash: the manifest discovery
+        // normalizes `requires` to wp/fleekdash/php — mirror it exactly.
         'requires' => [
             'wp' => '6.5',
-            'php' => '8.0',
             'fleekdash' => FLEEKDASH_EXCALIDRAW_MIN_FD,
+            'php' => '8.0',
         ],
+        'tags' => ['drawing', 'editor', 'reference'],
         'routes' => [
             [
                 'path' => 'excalidraw/editor',
