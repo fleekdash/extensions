@@ -82,7 +82,7 @@
             "layers"
           ]
         },
-        { "type": "string", "pattern": "^https?://.+" }
+        { "type": "string", "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://.+" }
       ]
     },
     "category": { "type": "string", "default": "plugin" },
@@ -188,8 +188,8 @@
         "component_url": {
           "description": "http(s) URL, site-relative path (/…), or manifest-relative path; same contract as the runtime route validator (no schemes other than http(s), no //, no .., no backslash). fleekdash_sdk_url is appended automatically.",
           "anyOf": [
-            { "type": "string", "pattern": "^https?://.+" },
-            { "type": "string", "pattern": "^/[^/].+" },
+            { "type": "string", "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://.+" },
+            { "type": "string", "pattern": "^/([^/].*)?$" },
             {
               "type": "string",
               "pattern": "^(?!.*\\.\\.)[^/:\\\\][^:\\\\]*$"

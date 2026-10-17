@@ -29,7 +29,8 @@ export interface IntegrationRoute {
    * ("dist/pages/editor.html") resolves against the manifest directory;
    * a leading "/" is site-relative and http(s) URLs pass through.
    * `fleekdash_sdk_url` is appended automatically at sync time; callers
-   * of `Registry::register()` must append it themselves for parity.
+   * of `Registry::register()` must pass an already-absolute URL with the
+   * param appended themselves for parity.
    */
   component_url: string;
   icon?: ManifestIcon;
