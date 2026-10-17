@@ -17,23 +17,35 @@ defined('ABSPATH') || exit;
 
 const FLEEKDASH_EXCALIDRAW_INTEGRATION_ID = 'excalidraw';
 const FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS = '\FleekDash\Integration\Registry';
+const FLEEKDASH_EXCALIDRAW_REGISTRAR_CLASS = '\FleekDash\Extension\ExtensionAppRegistrar';
 const FLEEKDASH_EXCALIDRAW_MIN_FD = '2.6.7';
+
+/**
+ * True when the host FleekDash carries the declarative app registrar —
+ * `fleekdash.json` is then the single writer (manifest sync owns the row,
+ * lifecycle reconcile handles is_active) and every imperative path below
+ * stays dormant. Only released FleekDash builds predating the registrar
+ * still execute the PHP fallback.
+ */
+function fleekdashExcalidrawHasDeclarativeRegistrar(): bool
+{
+    return class_exists(FLEEKDASH_EXCALIDRAW_REGISTRAR_CLASS);
+}
 
 /**
  * Register/re-sync integration in FleekDash registry.
  *
- * Transitional model: `fleekdash.json` now declares routes too — FleekDash's
- * app-manifest sync (plugins_loaded@90) re-registers them. This PHP
- * register() stays during the transition and MUST mirror the manifest
- * byte-for-byte on every forwarded field so both writers produce the
- * identical manifest hash (parity contract: docs/future/integration-system/
- * planning/extension-migration-playbook-08-out-2026.md step 2). Once a
- * release ships the routes JSON, this boilerplate plus the lifecycle hooks
- * below get dropped.
+ * Legacy fallback for FleekDash releases without the declarative registrar:
+ * this register() still owns the row there, so the payload MUST keep
+ * mirroring the manifest byte-for-byte on every forwarded field so both
+ * writers produce the identical manifest shape (parity contract:
+ * docs/future/integration-system/planning/
+ * extension-migration-playbook-08-out-2026.md step 2). Once the fleet no
+ * longer needs the fallback, this whole block is deleted.
  */
 function fleekdashExcalidrawRegisterIntegration(): void
 {
-    if (!class_exists(FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS)) {
+    if (fleekdashExcalidrawHasDeclarativeRegistrar() || !class_exists(FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS)) {
         return;
     }
 
@@ -96,6 +108,9 @@ function fleekdashExcalidrawRegisterIntegration(): void
 add_action('plugins_loaded', 'fleekdashExcalidrawRegisterIntegration', 30);
 
 register_activation_hook(__FILE__, static function (): void {
+    if (fleekdashExcalidrawHasDeclarativeRegistrar()) {
+        return; // manifest sync creates/activates the row on the next request
+    }
     fleekdashExcalidrawRegisterIntegration();
     if (class_exists(FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS)) {
         $registryClass = FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS;
@@ -104,6 +119,9 @@ register_activation_hook(__FILE__, static function (): void {
 });
 
 register_deactivation_hook(__FILE__, static function (): void {
+    if (fleekdashExcalidrawHasDeclarativeRegistrar()) {
+        return; // reconcileActivation flips is_active on the next sync
+    }
     if (class_exists(FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS)) {
         $registryClass = FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS;
         $registryClass::deactivate(FLEEKDASH_EXCALIDRAW_INTEGRATION_ID);
