@@ -9,10 +9,21 @@
   "author_uri": "https://fleekdash.com",
   "icon": "edit",
   "category": "plugin",
+  "integration_type": "standalone",
   "requires": {
     "wp": "6.5",
     "php": "8.0",
     "fleekdash": "2.6.7"
   },
-  "tags": ["drawing", "editor", "reference"]
+  "tags": ["drawing", "editor", "reference"],
+  "routes": [
+    {
+      "path": "excalidraw/editor",
+      "title": "Excalidraw Editor",
+      "component_url": "dist/pages/editor.html",
+      "icon": "edit",
+      "permissions": ["authenticated"],
+      "sandbox_mode": "none"
+    }
+  ]
 }

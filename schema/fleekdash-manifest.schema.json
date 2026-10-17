@@ -82,7 +82,7 @@
             "layers"
           ]
         },
-        { "type": "string", "pattern": "^https?://.+" }
+        { "type": "string", "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://.+" }
       ]
     },
     "category": { "type": "string", "default": "plugin" },
@@ -154,9 +154,60 @@
     "connector_id": {
       "type": "string",
       "description": "kind: integration → WP 7.0 native connector id; resolved to connector_status in the Hub."
+    },
+    "integration_type": {
+      "type": "string",
+      "enum": [
+        "native",
+        "standalone",
+        "hybrid",
+        "internal",
+        "mu-plugin",
+        "premium-catalog"
+      ],
+      "description": "kind: app → registry runtime type; defaults to \"standalone\"."
+    },
+    "routes": {
+      "type": "array",
+      "description": "kind: app → declarative iframe routes; registered into the integration registry at runtime. component_url accepts a manifest-relative path, a site-relative path (/…), or an http(s) URL; fleekdash_sdk_url is appended automatically.",
+      "items": { "$ref": "#/definitions/route" }
     }
   },
   "definitions": {
+    "route": {
+      "type": "object",
+      "required": ["path", "title", "component_url"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^[a-z0-9\\-/]+$",
+          "description": "Route slug resolved under #/app/<integration_id>/…, e.g. \"excalidraw/editor\"."
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "component_url": {
+          "description": "http(s) URL (scheme case-insensitive), site-relative path (/…, anything except a leading //), or manifest-relative path (no scheme, no .. traversal, no backslash); mirrors the runtime route validator exactly. fleekdash_sdk_url is appended automatically.",
+          "anyOf": [
+            { "type": "string", "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://.+" },
+            { "type": "string", "pattern": "^/([^/].*)?$" },
+            {
+              "type": "string",
+              "pattern": "^(?![a-zA-Z][a-zA-Z0-9+.\\-]*:)(?!.*\\.\\.)[^/\\\\][^\\\\]*$"
+            }
+          ]
+        },
+        "icon": { "$ref": "#/properties/icon" },
+        "permissions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sandbox_mode": {
+          "type": "string",
+          "enum": ["strict", "moderate", "none"],
+          "description": "Iframe sandbox attr mapping; registry default is \"strict\"."
+        }
+      }
+    },
     "settingsSchema": {
       "type": "object",
       "additionalProperties": {
