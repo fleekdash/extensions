@@ -186,7 +186,7 @@
         },
         "title": { "type": "string", "minLength": 1 },
         "component_url": {
-          "description": "http(s) URL, site-relative path (/…), or manifest-relative path — same contract as the runtime route validator (no schemes other than http(s), no //, no .., no backslash). fleekdash_sdk_url is appended automatically.",
+          "description": "http(s) URL, site-relative path (/…), or manifest-relative path; same contract as the runtime route validator (no schemes other than http(s), no //, no .., no backslash). fleekdash_sdk_url is appended automatically.",
           "anyOf": [
             { "type": "string", "pattern": "^https?://.+" },
             { "type": "string", "pattern": "^/[^/].+" },

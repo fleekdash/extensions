@@ -170,7 +170,7 @@ export interface FleekDashManifest {
    * automatically at sync time.
    *
    * During migration the plugin may keep its imperative
-   * `Registry::register()` — the imperative manifest must then carry the
+   * `Registry::register()`; the imperative manifest must then carry the
    * IDENTICAL routes array and every forwarded field (`kind`, `tags`,
    * `description`, `requires`, …) so both writers produce the same
    * stored manifest (zero extra writes). Once a release ships the JSON

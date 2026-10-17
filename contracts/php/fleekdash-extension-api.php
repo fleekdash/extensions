@@ -58,7 +58,7 @@ if (false) {
 
 if (false) {
 	/**
-	 * Imperative route/registration API for kind:app — prefer declaring
+	 * Imperative route/registration API for kind:app: prefer declaring
 	 * `routes` in fleekdash.json (the runtime sync registers them).
 	 * Keep this call only during migration, with content identical to the
 	 * JSON so both writers produce the same stored manifest. Real calls:
@@ -74,7 +74,7 @@ if (false) {
 	 *   settings_page_url?, requires?, tags?
 	 *
 	 * component_url: callers of register() must append `fleekdash_sdk_url`
-	 * themselves — the JSON path resolves relative paths against the
+	 * themselves; the JSON path resolves relative paths against the
 	 * manifest dir and appends it automatically.
 	 * Call register() on activation/init and unregister() on deactivation.
 	 * Sandbox modes: 'strict' | 'moderate' | 'none'.
