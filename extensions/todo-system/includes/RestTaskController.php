@@ -62,7 +62,8 @@ final class RestTaskController
             return new \WP_Error('invalid_title', 'Task title is required', ['status' => 400]);
         }
 
-        $projectError = self::invalidProjectError((int) ($request->get_param('project_id') ?? 0));
+        $projectId = (int) ($request->get_param('project_id') ?? 0);
+        $projectError = self::invalidProjectError($projectId);
         if ($projectError !== null) {
             return $projectError;
         }
