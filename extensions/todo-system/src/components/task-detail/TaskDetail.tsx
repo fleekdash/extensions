@@ -118,11 +118,13 @@ export function TaskDetail({
       pendingEdits.current[field] = input[field] as string;
     }
     void onUpdate(task.id, input).then((ok) => {
+      // Touch pending markers only while the pane still shows THIS task -
+      // a switch already reset them and they now belong to the new task.
+      if (lastTaskId.current !== task.id) return;
       for (const field of edited) delete pendingEdits.current[field];
-      // Restore only when the pane still shows THIS task, the field isn't
-      // being edited, and the input still holds the submitted value - a
-      // newer draft or a different task must never be overwritten.
-      if (ok || lastTaskId.current !== task.id) return;
+      // Restore only when the field isn't being edited and the input
+      // still holds the submitted value - a newer draft is never clobbered.
+      if (ok) return;
       const restore = (
         field: "title" | "description" | "section",
         set: (value: string) => void,
