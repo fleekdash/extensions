@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Task System
  * Plugin URI:        https://github.com/fleekdash/extensions
- * Description:       Reference FleekDash extension — Asana-style task management plus a live tour of every extension API capability.
+ * Description:       Asana-style task manager for FleekDash, doubling as a live tour of every extension API capability.
  * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
@@ -50,7 +50,7 @@ function fleekdashTaskSystemBootstrap(): void
 \add_action('init', 'fleekdashTaskSystemBootstrap');
 
 /**
- * True when the host FleekDash carries the declarative app registrar —
+ * True when the host FleekDash carries the declarative app registrar -
  * `fleekdash.json` is then the single writer (manifest sync owns the row,
  * lifecycle reconcile handles is_active) and every imperative path below
  * stays dormant. Only released FleekDash builds predating the registrar
@@ -62,7 +62,7 @@ function fleekdashTaskSystemHasDeclarativeRegistrar(): bool
 }
 
 /**
- * Declarative settings schema — identical to `fleekdash.json > settings`.
+ * Declarative settings schema - identical to `fleekdash.json > settings`.
  * Exposed so the imperative fallback below can forward the same map under
  * the legacy `settings_schema` key (parity contract).
  *
@@ -125,7 +125,7 @@ function fleekdashTaskSystemSettingsSchema(): array
  * Legacy fallback for FleekDash releases without the declarative registrar:
  * this register() still owns the row there, so the payload MUST keep
  * mirroring the manifest byte-for-byte on every forwarded field so both
- * writers produce the identical manifest shape (parity contract — see
+ * writers produce the identical manifest shape (parity contract - see
  * extensions/excalidraw for the reference implementation).
  */
 function fleekdashTaskSystemRegisterIntegration(): void
@@ -134,7 +134,7 @@ function fleekdashTaskSystemRegisterIntegration(): void
         return;
     }
 
-    // The manifest declares dist/* unconditionally — the pages/ sources need
+    // The manifest declares dist/* unconditionally - the pages/ sources need
     // the vite dev server and are never servable on their own.
     $appHtmlRelative = 'dist/pages/app.html';
     $apiDemoHtmlRelative = 'dist/pages/api-demo.html';
@@ -161,7 +161,7 @@ function fleekdashTaskSystemRegisterIntegration(): void
     $manifest = [
         'integration_id' => FLEEKDASH_TASK_SYSTEM_INTEGRATION_ID,
         'name' => 'Task System',
-        'description' => 'Reference FleekDash extension — Asana-style task management plus a live tour of every extension API capability.',
+        'description' => 'Reference FleekDash extension - Asana-style task management plus a live tour of every extension API capability.',
         'version' => FLEEKDASH_TASK_SYSTEM_VERSION,
         'author' => 'FleekDash',
         'author_uri' => 'https://fleekdash.com',
@@ -173,7 +173,7 @@ function fleekdashTaskSystemRegisterIntegration(): void
         'source_label' => 'Plugin',
         'category' => 'plugin',
         // Key order matters for the parity hash: manifest discovery
-        // normalizes `requires` to wp/fleekdash/php — mirror it exactly.
+        // normalizes `requires` to wp/fleekdash/php - mirror it exactly.
         'requires' => [
             'wp' => '6.5',
             'fleekdash' => FLEEKDASH_TASK_SYSTEM_MIN_FD,

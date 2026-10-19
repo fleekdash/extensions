@@ -1,5 +1,5 @@
 /**
- * Values returned by `sdk.getIntegrationSettings()` — mirrors the
+ * Values returned by `sdk.getIntegrationSettings()` - mirrors the
  * `settings` map in fleekdash.json (and the PHP parity schema).
  */
 export type TodoSettings = {

@@ -1,5 +1,5 @@
 /**
- * Settings field schema — mirrors `ManifestSettingsSchemaValidator::validate()`
+ * Settings field schema - mirrors `ManifestSettingsSchemaValidator::validate()`
  * (includes/Integration/ManifestSettingsSchemaValidator.php). Shared by
  * `manifest.settings`, `manifest.sections`, Registry `settings_schema`,
  * and `fleekdash_register_settings_fields()`.

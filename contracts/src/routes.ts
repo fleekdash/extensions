@@ -16,13 +16,13 @@ import type {
 } from "./manifest";
 import type { SettingsSchema } from "./settings";
 
-/** iframe sandbox preset — mirrors ALLOWED_SANDBOX_MODES. */
+/** iframe sandbox preset - mirrors ALLOWED_SANDBOX_MODES. */
 export type SandboxMode = "strict" | "moderate" | "none";
 
 export interface IntegrationRoute {
-  /** Required — inner path under `#/app/<id>`; sanitized to [a-z0-9\-/]. */
+  /** Required - inner path under `#/app/<id>`; sanitized to [a-z0-9\-/]. */
   path: string;
-  /** Required — menu/route label. */
+  /** Required - menu/route label. */
   title: string;
   /**
    * Required iframe UI. In `fleekdash.json` a manifest-relative path

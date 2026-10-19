@@ -71,7 +71,7 @@ final class RestSupport
             'order' => 'ASC',
         ]);
 
-        // Emails are PII — only expose them when the caller may list users
+        // Emails are PII - only expose them when the caller may list users
         // (admins/editors). The assignee UI only needs name + avatar.
         $canListUsers = \current_user_can('list_users');
 

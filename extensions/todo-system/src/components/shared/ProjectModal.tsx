@@ -140,7 +140,7 @@ export function ProjectModal({
                 description: description.trim(),
                 color,
               }).then((created) => {
-                // Only close on success — a failed create keeps the form.
+                // Only close on success - a failed create keeps the form.
                 if (created) {
                   dialogRef.current?.close();
                 }

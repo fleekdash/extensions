@@ -1,4 +1,4 @@
-# Vendored schema — do not edit here
+# Vendored schema: do not edit here
 
 `fleekdash-manifest.schema.json` is copied from the FleekDash monorepo:
 

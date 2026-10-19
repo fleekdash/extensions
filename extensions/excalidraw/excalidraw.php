@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Excalidraw
  * Plugin URI:        https://github.com/fleekdash/extensions
- * Description:       Advanced native drawing tool for FleekDash — iframe editor route.
+ * Description:       A full Excalidraw drawing board inside FleekDash. Sketch diagrams, wireframes and visual boards without leaving wp-admin.
  * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
@@ -21,7 +21,7 @@ const FLEEKDASH_EXCALIDRAW_REGISTRAR_CLASS = '\FleekDash\Extension\ExtensionAppR
 const FLEEKDASH_EXCALIDRAW_MIN_FD = '2.6.7';
 
 /**
- * True when the host FleekDash carries the declarative app registrar —
+ * True when the host FleekDash carries the declarative app registrar -
  * `fleekdash.json` is then the single writer (manifest sync owns the row,
  * lifecycle reconcile handles is_active) and every imperative path below
  * stays dormant. Only released FleekDash builds predating the registrar
@@ -49,7 +49,7 @@ function fleekdashExcalidrawRegisterIntegration(): void
         return;
     }
 
-    // The manifest declares dist/pages/editor.html unconditionally — the
+    // The manifest declares dist/pages/editor.html unconditionally - the
     // pages/ source needs the vite dev server and is never servable on its
     // own, so a pages/ fallback would only create parity drift.
     $editorHtmlRelative = 'dist/pages/editor.html';
@@ -65,7 +65,7 @@ function fleekdashExcalidrawRegisterIntegration(): void
     $manifest = [
         'integration_id' => FLEEKDASH_EXCALIDRAW_INTEGRATION_ID,
         'name' => 'Excalidraw',
-        'description' => 'Advanced native drawing tool for FleekDash — iframe editor route.',
+        'description' => 'Advanced native drawing tool for FleekDash - iframe editor route.',
         'version' => '1.1.0',
         'author' => 'FleekDash',
         'author_uri' => 'https://fleekdash.com',
@@ -77,7 +77,7 @@ function fleekdashExcalidrawRegisterIntegration(): void
         'source_label' => 'Plugin',
         'category' => 'plugin',
         // Key order matters for the parity hash: the manifest discovery
-        // normalizes `requires` to wp/fleekdash/php — mirror it exactly.
+        // normalizes `requires` to wp/fleekdash/php - mirror it exactly.
         'requires' => [
             'wp' => '6.5',
             'fleekdash' => FLEEKDASH_EXCALIDRAW_MIN_FD,
@@ -95,7 +95,7 @@ function fleekdashExcalidrawRegisterIntegration(): void
                 ),
                 'icon' => 'edit',
                 'permissions' => ['authenticated'],
-                // First-party plugin on same origin — no sandbox needed (avoids allow-scripts+allow-same-origin warning)
+                // First-party plugin on same origin - no sandbox needed (avoids allow-scripts+allow-same-origin warning)
                 'sandbox_mode' => 'none',
             ],
         ],
