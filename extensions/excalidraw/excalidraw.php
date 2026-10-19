@@ -111,6 +111,9 @@ register_activation_hook(__FILE__, static function (): void {
     if (fleekdashExcalidrawHasDeclarativeRegistrar()) {
         return; // manifest sync creates/activates the row on the next request
     }
+    if (!\defined('FLEEKDASH_VERSION') || \version_compare((string) FLEEKDASH_VERSION, FLEEKDASH_EXCALIDRAW_MIN_FD, '<')) {
+        return;
+    }
     fleekdashExcalidrawRegisterIntegration();
     if (class_exists(FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS)) {
         $registryClass = FLEEKDASH_EXCALIDRAW_REGISTRY_CLASS;
