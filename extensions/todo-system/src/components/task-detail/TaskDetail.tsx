@@ -50,6 +50,12 @@ export function TaskDetail({
     Partial<Record<"title" | "description" | "section", string>>
   >({});
   const lastTaskId = useRef(task.id);
+  // Mirrors of the freshest prop/local values so async callbacks can check
+  // what the pane actually shows *now* (not at commit time).
+  const taskRef = useRef(task);
+  taskRef.current = task;
+  const valuesRef = useRef({ title, description, section });
+  valuesRef.current = { title, description, section };
   useEffect(() => {
     if (lastTaskId.current !== task.id) {
       lastTaskId.current = task.id;
@@ -113,13 +119,22 @@ export function TaskDetail({
     }
     void onUpdate(task.id, input).then((ok) => {
       for (const field of edited) delete pendingEdits.current[field];
-      if (!ok) {
-        // Rejected edit - put the server's values back in the fields.
-        if (input.title !== undefined) setTitle(task.title);
-        if (input.description !== undefined)
-          setDescription(task.description);
-        if (input.section !== undefined) setSection(task.section);
-      }
+      // Restore only when the pane still shows THIS task, the field isn't
+      // being edited, and the input still holds the submitted value - a
+      // newer draft or a different task must never be overwritten.
+      if (ok || lastTaskId.current !== task.id) return;
+      const restore = (
+        field: "title" | "description" | "section",
+        set: (value: string) => void,
+      ) => {
+        if (input[field] === undefined) return;
+        if (focusedField.current === field) return;
+        if (valuesRef.current[field] !== input[field]) return;
+        set(taskRef.current[field]);
+      };
+      restore("title", setTitle);
+      restore("description", setDescription);
+      restore("section", setSection);
     });
   };
 
