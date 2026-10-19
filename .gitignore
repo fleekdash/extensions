@@ -1,5 +1,5 @@
 node_modules/
 .env
 .env.*
-# dist/ is intentionally TRACKED — release CI zips the extension dir and the
+# dist/ is intentionally TRACKED - release CI zips the extension dir and the
 # zip must contain the built iframe pages (WP svn convention).
