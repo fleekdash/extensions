@@ -30,13 +30,21 @@
           ) || "/wp-content/plugins/fleekdash/public/sdk/fleekdash-sdk.js";
         try {
           var url = new URL(raw, window.location.origin);
-          // Same-origin only, and URL.href percent-encodes quotes, so the
-          // written tag cannot break out of its src attribute.
+          // Same-origin only; the app polls for window.FleekDashSDK
+          // (whenFleekDashSdk) so async script loading is safe.
           if (url.origin === window.location.origin) {
-            document.write('<script src="' + url.href + '"><\/script>');
+            var script = document.createElement("script");
+            script.src = url.href;
+            script.onerror = function () {
+              window.__fleekdashSdkLoadFailed = true;
+            };
+            document.head.appendChild(script);
+          } else {
+            window.__fleekdashSdkLoadFailed = true;
           }
         } catch (error) {
           console.warn("[Todo System] fleekdash_sdk_url rejected", error);
+          window.__fleekdashSdkLoadFailed = true;
         }
       })();
     </script>
@@ -50,8 +58,8 @@
         overflow: hidden;
       }
     </style>
-    <script type="module" crossorigin src="../assets/app-CiQN76QW.js"></script>
-    <link rel="modulepreload" crossorigin href="../assets/settings-C1F3H_oZ.js">
+    <script type="module" crossorigin src="../assets/app-C-ks8npE.js"></script>
+    <link rel="modulepreload" crossorigin href="../assets/settings-Fj8ExrGN.js">
     <link rel="stylesheet" crossorigin href="../assets/app-4BsqIc_g.css">
   </head>
   <body>

@@ -107,11 +107,15 @@ final class RestApi
     }
 
     /**
-     * @return \WP_REST_Response
+     * @return \WP_REST_Response|\WP_Error
      */
-    public static function bootstrap(\WP_REST_Request $request): \WP_REST_Response
+    public static function bootstrap(\WP_REST_Request $request)
     {
-        $tasksResponse = RestTaskController::listTasks($request)->get_data();
+        $tasksResult = RestTaskController::listTasks($request);
+        if (\is_wp_error($tasksResult)) {
+            return $tasksResult;
+        }
+        $tasksResponse = $tasksResult->get_data();
 
         return \rest_ensure_response([
             'success' => true,

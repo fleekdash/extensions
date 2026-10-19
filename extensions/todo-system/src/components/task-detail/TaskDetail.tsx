@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { searchPosts } from "../../api/todo-api";
 import type {
   Task,
@@ -20,7 +20,7 @@ type TaskDetailProps = {
   readonly adminUrl?: string;
   readonly saving?: boolean;
   readonly onClose: () => void;
-  readonly onUpdate: (id: number, input: Partial<TaskInput>) => Promise<unknown>;
+  readonly onUpdate: (id: number, input: Partial<TaskInput>) => Promise<boolean>;
   readonly onDelete: (id: number) => Promise<unknown>;
 };
 
@@ -42,11 +42,46 @@ export function TaskDetail({
   >([]);
   const [searchingPosts, setSearchingPosts] = useState(false);
 
+  // Sync server values into safe fields only - never clobber the field
+  // being edited, and never overwrite a submitted-but-unconfirmed edit
+  // (a stale interim response would revert the input otherwise).
+  const focusedField = useRef<string | null>(null);
+  const pendingEdits = useRef<
+    Partial<Record<"title" | "description" | "section", string>>
+  >({});
+  const lastTaskId = useRef(task.id);
+  // Mirrors of the freshest prop/local values so async callbacks can check
+  // what the pane actually shows *now* (not at commit time).
+  const taskRef = useRef(task);
+  taskRef.current = task;
+  const valuesRef = useRef({ title, description, section });
+  valuesRef.current = { title, description, section };
   useEffect(() => {
-    setTitle(task.title);
-    setDescription(task.description);
-    setSection(task.section);
-  }, [task.id, task.title, task.description, task.section]);
+    if (lastTaskId.current !== task.id) {
+      lastTaskId.current = task.id;
+      pendingEdits.current = {};
+      focusedField.current = null;
+      setTitle(task.title);
+      setDescription(task.description);
+      setSection(task.section);
+      return;
+    }
+    const maybeSync = (
+      field: "title" | "description" | "section",
+      server: string,
+      set: (value: string) => void,
+    ) => {
+      const pending = pendingEdits.current[field];
+      if (pending !== undefined) {
+        if (server === pending) delete pendingEdits.current[field];
+        else return;
+      }
+      if (focusedField.current !== field) set(server);
+    };
+    maybeSync("title", task.title, setTitle);
+    maybeSync("description", task.description, setDescription);
+    maybeSync("section", task.section, setSection);
+  }, [task]);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,7 +111,37 @@ export function TaskDetail({
   }, [postQuery]);
 
   const commit = (input: Partial<TaskInput>) => {
-    void onUpdate(task.id, input);
+    const edited = (["title", "description", "section"] as const).filter(
+      (field) => input[field] !== undefined,
+    );
+    for (const field of edited) {
+      pendingEdits.current[field] = input[field] as string;
+    }
+    void onUpdate(task.id, input).then((ok) => {
+      // Touch pending markers only while the pane still shows THIS task -
+      // a switch already reset them and they now belong to the new task.
+      if (lastTaskId.current !== task.id) return;
+      for (const field of edited) delete pendingEdits.current[field];
+      // Restore only when the field isn't being edited and the input
+      // still holds the submitted value - a newer draft is never clobbered.
+      if (ok) return;
+      const restore = (
+        field: "title" | "description" | "section",
+        set: (value: string) => void,
+      ) => {
+        if (input[field] === undefined) return;
+        if (focusedField.current === field) return;
+        const local = valuesRef.current[field];
+        const submitted = input[field] as string;
+        // Blur submits trimmed title/section while the input keeps the
+        // raw text - both spellings count as "unchanged since submit".
+        if (local !== submitted && local.trim() !== submitted) return;
+        set(taskRef.current[field]);
+      };
+      restore("title", setTitle);
+      restore("description", setDescription);
+      restore("section", setSection);
+    });
   };
 
   const toggleAssignee = (userId: number) => {
@@ -121,7 +186,11 @@ export function TaskDetail({
             className="todo-title-input"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
+            onFocus={() => {
+              focusedField.current = "title";
+            }}
             onBlur={() => {
+              focusedField.current = null;
               if (title.trim() && title.trim() !== task.title) {
                 commit({ title: title.trim() });
               }
@@ -188,7 +257,11 @@ export function TaskDetail({
             className="todo-input"
             value={section}
             onChange={(event) => setSection(event.target.value)}
+            onFocus={() => {
+              focusedField.current = "section";
+            }}
             onBlur={() => {
+              focusedField.current = null;
               if (section.trim() && section.trim() !== task.section) {
                 commit({ section: section.trim() });
               }
@@ -203,7 +276,11 @@ export function TaskDetail({
             className="todo-textarea"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            onFocus={() => {
+              focusedField.current = "description";
+            }}
             onBlur={() => {
+              focusedField.current = null;
               if (description !== task.description) {
                 commit({ description });
               }

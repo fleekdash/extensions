@@ -63,8 +63,9 @@ final class RestTaskController
         }
 
         $projectId = (int) ($request->get_param('project_id') ?? 0);
-        if ($projectId > 0 && !\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
-            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        $projectError = self::invalidProjectError($projectId);
+        if ($projectError !== null) {
+            return $projectError;
         }
 
         $meta = self::buildTaskMetaFromRequest($request, true);
@@ -102,6 +103,13 @@ final class RestTaskController
         $loadError = self::assertTaskPost($taskId);
         if ($loadError instanceof \WP_Error) {
             return $loadError;
+        }
+
+        // Validate the requested project before writing post fields, so a
+        // rejected assignment cannot leave a partially-updated task behind.
+        $projectError = self::validateTaskProjectParam($request);
+        if ($projectError instanceof \WP_Error) {
+            return $projectError;
         }
 
         $postError = self::applyTaskPostFields($taskId, $request);
@@ -185,6 +193,23 @@ final class RestTaskController
     /**
      * @return \WP_Error|null
      */
+    private static function invalidProjectError(int $projectId): ?\WP_Error
+    {
+        if ($projectId > 0 && !\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
+            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        }
+
+        return null;
+    }
+
+    private static function validateTaskProjectParam(\WP_REST_Request $request): ?\WP_Error
+    {
+        return self::invalidProjectError((int) $request->get_param('project_id'));
+    }
+
+    /**
+     * @return \WP_Error|null
+     */
     private static function applyTaskProject(int $taskId, \WP_REST_Request $request): ?\WP_Error
     {
         if ($request->get_param('project_id') === null) {
@@ -196,8 +221,8 @@ final class RestTaskController
             return null;
         }
 
-        if (!\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
-            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        if (($projectError = self::invalidProjectError($projectId)) !== null) {
+            return $projectError;
         }
 
         $assigned = \wp_set_object_terms($taskId, [$projectId], PostTypes::PROJECT_TAXONOMY);
