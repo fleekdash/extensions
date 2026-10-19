@@ -25,9 +25,7 @@ final class Meta
             \register_post_meta(PostTypes::TASK_POST_TYPE, $key, [
                 'single' => true,
                 'type' => self::metaType($key),
-                'show_in_rest' => [
-                    'schema' => self::metaSchema($key),
-                ],
+                'show_in_rest' => false,
                 'auth_callback' => static function (): bool {
                     return \current_user_can('edit_posts');
                 },
