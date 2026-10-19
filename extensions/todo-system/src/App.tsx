@@ -37,7 +37,7 @@ export function App() {
 
     sdk.init({
       integration_id: "todo-system",
-      // SDK-level debug is opt-in via ?sdk_debug=1 — it can't wait for the
+      // SDK-level debug is opt-in via ?sdk_debug=1 - it can't wait for the
       // async `debug_logging` setting, which gates sdkLog() instead.
       debug: new URLSearchParams(window.location.search).has("sdk_debug"),
       deferReady: embedded,
@@ -49,7 +49,7 @@ export function App() {
       }
     });
 
-    // Manifest-declared extension settings (fleekdash.json → settings) —
+    // Manifest-declared extension settings (fleekdash.json → settings) -
     // the host resolves defaults + stored values server-side.
     sdk
       .getIntegrationSettings?.()

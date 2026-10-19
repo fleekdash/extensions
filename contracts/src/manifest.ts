@@ -1,5 +1,5 @@
 /**
- * `fleekdash.json` manifest — mirrors `ExtensionManifest::validate()`
+ * `fleekdash.json` manifest - mirrors `ExtensionManifest::validate()`
  * (includes/Extension/ExtensionManifest.php). Keep in sync: the validator
  * is the runtime source of truth, this type is the author-facing contract.
  */
@@ -12,7 +12,7 @@ export type ExtensionKind =
   | "connector";
 
 /**
- * Icons allowed in `manifest.icon` / route `icon` — allowlist mirrors
+ * Icons allowed in `manifest.icon` / route `icon` - allowlist mirrors
  * `ManifestValidationConstants::ALLOWED_ICONS` (Lucide names via icons-map).
  */
 export type ManifestIconName =
@@ -71,7 +71,7 @@ export type ManifestIcon =
 
 /**
  * Version requirements checked at discovery time. `wp`/`fleekdash`/`php`
- * accept plain version strings only ("6.5", "2.7.0-beta.1") — the validator
+ * accept plain version strings only ("6.5", "2.7.0-beta.1") - the validator
  * rejects range syntax (`>=`, `^`). `plugins`/`themes` list
  * required plugin files or theme slugs.
  */
@@ -87,11 +87,11 @@ import type { SettingsSchema } from "./settings";
 import type { IntegrationRoute } from "./routes";
 
 export interface FleekDashManifest {
-  /** Required — one of the five extension kinds. */
+  /** Required - one of the five extension kinds. */
   kind: ExtensionKind;
-  /** Required — lowercase slug; the stable identity (merger + Hub + storage). */
+  /** Required - lowercase slug; the stable identity (merger + Hub + storage). */
   id: string;
-  /** Required — display name. */
+  /** Required - display name. */
   name: string;
 
   description?: string;
@@ -107,7 +107,7 @@ export interface FleekDashManifest {
 
   /**
    * Main plugin file relative to the extension directory.
-   * REQUIRED for kind `compat` and `integration` — `app`/`snippet` derive
+   * REQUIRED for kind `compat` and `integration` - `app`/`snippet` derive
    * their location from the scanned directory.
    */
   plugin_file?: string;
@@ -118,13 +118,13 @@ export interface FleekDashManifest {
   requires?: ManifestRequires;
 
   /**
-   * Snippet entry point — relative .php path inside the package
+   * Snippet entry point - relative .php path inside the package
    * (^[a-zA-Z0-9_\-\.\/]+\.php$, no traversal). Used by the snippet loader.
    */
   entry?: string;
 
   /**
-   * Settings fields owned by this extension — flat map key → field schema.
+   * Settings fields owned by this extension - flat map key → field schema.
    * Injected into the Hub/extension settings surfaces.
    */
   settings?: SettingsSchema;
@@ -143,7 +143,7 @@ export interface FleekDashManifest {
   tags?: string[];
   preview_link?: string;
   roadmap_link?: string;
-  /** e.g. "upcoming" — catalog cards that are not installable yet. */
+  /** e.g. "upcoming" - catalog cards that are not installable yet. */
   mode?: string;
 
   /**

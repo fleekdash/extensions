@@ -3,7 +3,7 @@
   "kind": "app",
   "id": "excalidraw",
   "name": "Excalidraw",
-  "description": "Advanced native drawing tool for FleekDash — iframe editor route.",
+  "description": "A full Excalidraw drawing board inside FleekDash. Sketch diagrams, wireframes and visual boards without leaving wp-admin.",
   "version": "1.1.0",
   "author": "FleekDash",
   "author_uri": "https://fleekdash.com",

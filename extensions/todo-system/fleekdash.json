@@ -3,7 +3,7 @@
   "kind": "app",
   "id": "todo-system",
   "name": "Task System",
-  "description": "Reference FleekDash extension — Asana-style task management plus a live tour of every extension API capability.",
+  "description": "Asana-style task manager for FleekDash, doubling as a live tour of every extension API capability. The reference extension to learn from.",
   "version": "1.1.0",
   "author": "FleekDash",
   "author_uri": "https://fleekdash.com",

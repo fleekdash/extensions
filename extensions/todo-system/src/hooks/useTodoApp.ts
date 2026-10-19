@@ -102,7 +102,7 @@ export function useTodoApp(
     void load();
   }, [enabled, load]);
 
-  // `default_view` arrives asynchronously via getIntegrationSettings —
+  // `default_view` arrives asynchronously via getIntegrationSettings -
   // apply it only until the user picks a view explicitly.
   useEffect(() => {
     if (!userPickedViewRef.current) {
@@ -318,7 +318,7 @@ export function useTodoApp(
     [handleUpdateTask],
   );
 
-  // Switching projects closes the detail pane — the selected task belongs
+  // Switching projects closes the detail pane - the selected task belongs
   // to the previous project and must not stay open next to the new list.
   const selectProject = useCallback((id: number | null) => {
     setActiveProjectId(id);

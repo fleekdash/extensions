@@ -122,7 +122,7 @@ export function ApiDemo() {
 
   const notify = (type: NotificationType) =>
     sdk?.showNotification(
-      `Todo System demo — ${type} notification`,
+      `Todo System demo - ${type} notification`,
       type,
     );
 
@@ -142,7 +142,7 @@ export function ApiDemo() {
     <div className="demo-page">
       <header className="demo-header">
         <div>
-          <h1>FleekDash SDK — live tour</h1>
+          <h1>FleekDash SDK - live tour</h1>
           <p className="demo-subtitle">
             Every card below calls the real bridge this page is running on.{" "}
             {embedded
@@ -180,7 +180,7 @@ export function ApiDemo() {
         </DemoCard>
 
         <DemoCard
-          title="WordPress data — read"
+          title="WordPress data - read"
           api="getWordPressData(endpoint, params)"
           description="Runs WP REST GET through the host's authenticated client."
           run={runs.read}
@@ -210,9 +210,9 @@ export function ApiDemo() {
         </DemoCard>
 
         <DemoCard
-          title="WordPress data — write"
+          title="WordPress data - write"
           api="mutateWordPressData(endpoint, {method, body})"
-          description="Creates a real task, then deletes it — a full REST roundtrip."
+          description="Creates a real task, then deletes it - a full REST roundtrip."
           run={runs.write}
         >
           <DemoButton
@@ -264,7 +264,7 @@ export function ApiDemo() {
         <DemoCard
           title="Navigation"
           api="navigate(path)"
-          description="Host-side hash routing — jumps to another route without reloads."
+          description="Host-side hash routing - jumps to another route without reloads."
           run={runs.navigate}
         >
           <DemoButton
@@ -293,7 +293,7 @@ export function ApiDemo() {
               run("modal", () =>
                 sdk?.openModal({
                   title: "Posts (via openModal)",
-                  // Extension assets always live under wp-content — deriving
+                  // Extension assets always live under wp-content - deriving
                   // the admin URL from our own path stays correct on
                   // subdirectory installs.
                   url: `${window.location.origin}${window.location.pathname.split("/wp-content/")[0]}/wp-admin/edit.php`,
@@ -367,7 +367,7 @@ export function ApiDemo() {
             onClick={() =>
               run("log", async () => {
                 sdk?.log("api-demo", "hello from todo-system");
-                return "sent — check host debug output";
+                return "sent - check host debug output";
               })
             }
           />
@@ -376,7 +376,7 @@ export function ApiDemo() {
         <DemoCard
           title="Raw sendMessage"
           api="sendMessage(type, data)"
-          description="The primitive every helper wraps — shown for completeness."
+          description="The primitive every helper wraps - shown for completeness."
           run={runs.raw}
         >
           <DemoButton
@@ -394,7 +394,7 @@ export function ApiDemo() {
         <DemoCard
           title="onMessage"
           api="onMessage(type, handler)"
-          description="This page subscribes to THEME_CHANGED — toggle host theme and watch the pill."
+          description="This page subscribes to THEME_CHANGED - toggle host theme and watch the pill."
           run={runs.messages}
         >
           <DemoButton

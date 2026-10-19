@@ -34,7 +34,7 @@ export function syncMenuBadge(
   void sdk
     .updateMenuBadge(BADGE_ROUTE_PATH, count, settings.badge_color)
     .then((result) => {
-      // Older hosts acknowledge the message but return updated:false —
+      // Older hosts acknowledge the message but return updated:false -
       // forward-compatible call, surface it once instead of failing loudly.
       if (
         !badgeDeclineLogged &&
@@ -44,7 +44,7 @@ export function syncMenuBadge(
       ) {
         badgeDeclineLogged = true;
         console.info(
-          "[todo-system] Host has no menu-badge support yet — updateMenuBadge was a no-op.",
+          "[todo-system] Host has no menu-badge support yet - updateMenuBadge was a no-op.",
         );
       }
     })

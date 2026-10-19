@@ -1,91 +1,144 @@
-# fleekdash/extensions
+# FleekDash Extensions
 
-Open-source installable extensions for [FleekDash](https://fleekdash.com).
-One directory per extension under `extensions/<slug>/` — each is a
-WordPress plugin discovered by the FleekDash Hub through its
-`fleekdash.json` manifest.
+The official open source collection of installable extensions for
+[FleekDash](https://fleekdash.com), the React powered workspace that replaces
+the WordPress admin.
 
-> Premium/paid extensions live in the private `fleekdash/extensions-premium`
-> repository — this repo is the OSS collection only.
+Every directory under `extensions/` is a **real, working WordPress plugin**
+you can install on any site running FleekDash. No special packaging, no
+hidden framework: each extension is just a plugin that happens to ship a
+`fleekdash.json` manifest, and that single file is what turns it into a
+FleekDash app with its own routes, settings screens and menu entries.
 
-## Layout
+> Premium extensions live in the private `fleekdash/extensions-premium`
+> repository. This repo is the open source collection only.
+
+## Extensions in this repo
+
+| Extension | What it does |
+|---|---|
+| [`extensions/todo-system`](extensions/todo-system/) | A full Asana style task manager inside wp-admin, and the canonical tour of every extension API capability. |
+| [`extensions/excalidraw`](extensions/excalidraw/) | A complete Excalidraw drawing board living on a FleekDash app route. |
+
+If you are exploring what extensions can do, start with **Task System**: its
+second route is a live API demo where every card runs a real SDK call and
+prints the host's actual response.
+
+## What an extension actually is
+
+An extension is a normal WordPress plugin plus one manifest:
 
 ```
-extensions/<slug>/
-├── fleekdash.json      ← required — kind/id/name + optional settings/sections/requires
-├── <slug>.php          ← plugin bootstrap (Requires Plugins: fleekdash)
-└── ...                 ← extension code (PHP, built assets committed or built by CI)
-contracts/              ← vendored @fleekdash/contracts (workspace package — see note)
-schema/                 ← vendored fleekdash.json JSON Schema (see note below)
+my-extension/
+├── fleekdash.json      manifest: id, routes, settings, requirements
+├── my-extension.php    plugin bootstrap (Requires Plugins: fleekdash)
+└── ...                 your code: PHP, a built React app, whatever you like
 ```
 
-This repo is a **pnpm workspace** (`contracts` + `extensions/*`). Extension
-UI code imports the typed contract surface as
-`"@fleekdash/contracts": "workspace:*"` — manifest types, `FleekDashSdk`,
-`getFleekDashSdk()`, `getBrowserWindow()`. Until the package ships to npm,
-`contracts/` is a vendored source-only copy: `pnpm install` at the root
-wires it to every extension.
-
-`dist/` is **committed** (WP svn convention) — the release zip ships the
-built iframe pages without needing a CI build step.
-
-## Manifests
-
-Every extension ships a `fleekdash.json` at its root and it is validated
-in CI against `schema/fleekdash-manifest.schema.json` (draft-07).
-
-- **Source of truth:** the schema is generated from the FleekDash
-  monorepo's `@fleekdash/contracts` package
-  (`packages/extension-contracts/schema/`). When the runtime validator
-  changes, the monorepo updates the package **and** syncs this vendored
-  copy — do not hand-edit it here.
-- **Editor autocomplete:** `.vscode/settings.json` already associates the
-  schema with `**/fleekdash.json`.
-- Minimal valid manifest:
+The manifest declares what the extension adds to FleekDash:
 
 ```jsonc
 {
-  "kind": "integration",
+  "kind": "app",
   "id": "my-extension",
   "name": "My Extension",
   "version": "1.0.0",
-  "plugin_file": "my-extension.php"
+  "plugin_file": "my-extension.php",
+  "routes": [
+    {
+      "path": "my-extension/app",
+      "title": "My App",
+      "component_url": "dist/pages/app.html",
+      "icon": "sparkles",
+      "permissions": ["authenticated"],
+      "sandbox_mode": "none"
+    }
+  ]
 }
 ```
 
+FleekDash discovers the manifest, creates the Hub card, mounts your page at
+`#/app/my-extension/app` inside a sandboxed iframe, and serves your declared
+settings. Your UI talks to the host through a typed postMessage SDK
+(`window.FleekDashSDK`, typed via `@fleekdash/contracts`): read WordPress
+data, show notifications, open modals, navigate, update menu badges and react
+to theme changes. Your plugin keeps full access to WordPress hooks, custom
+post types and REST endpoints on the PHP side.
+
+## Build your own
+
+The shortest path from zero to a running extension:
+
+1. **Clone the starter.** [`fleekdash/extension-starter`](https://github.com/fleekdash/extension-starter)
+   is this exact shape, ready to rename: manifest, plugin bootstrap, one
+   iframe route, one settings field, typed SDK wired up.
+2. **Iterate without WordPress.** [`fleekdash/devkit`](https://github.com/fleekdash/devkit)
+   runs your built page inside a mock FleekDash host that answers the real
+   SDK protocol with fixture data. No PHP, no database, instant reload.
+3. **Install on a real site** when you want the genuine host: copy the plugin
+   into `wp-content/plugins/`, activate, done.
+
+What could you build? A few ideas that map naturally onto the API:
+
+- a support inbox reading tickets from a custom post type
+- a CRM panel over your customers and their order history
+- an analytics dashboard pulling from your favorite service
+- a notes app linked to the post being edited
+- a project board synced with WooCommerce orders
+- an uptime monitor card fed by a scheduled REST call
+
+## Repository layout
+
+```
+extensions/<slug>/    one directory per extension (a WP plugin)
+contracts/            vendored @fleekdash/contracts (workspace package)
+schema/               vendored fleekdash.json JSON Schema
+```
+
+This repo is a **pnpm workspace** covering `contracts` and `extensions/*`.
+Extension UI code imports the typed contract surface as
+`"@fleekdash/contracts": "workspace:*"`, which provides manifest types,
+`FleekDashSdk`, `getFleekDashSdk()` and `getBrowserWindow()`. Until the
+package ships to npm, `contracts/` is a vendored, source only copy; running
+`pnpm install` at the root wires it into every extension.
+
+`dist/` output is **committed** on purpose (the WordPress.org convention):
+release zips ship built iframe pages, so installs never need Node.
+
+## Manifest validation
+
+Every `fleekdash.json` is validated in CI against
+`schema/fleekdash-manifest.schema.json` (JSON Schema draft 07), and your
+editor gets autocomplete for free: `.vscode/settings.json` already
+associates the schema with `**/fleekdash.json`.
+
+The schema is generated from the `@fleekdash/contracts` package inside the
+FleekDash monorepo and vendored here. Please do not hand edit it; changes
+flow in when the runtime validator evolves.
+
 ## Releasing an extension
 
-Releases are tag-driven. Tag format: `ext-<slug>-v<version>`.
+Releases are tag driven. Tag format: `ext-<slug>-v<version>`.
 
 ```bash
 git tag ext-my-extension-v1.0.0
 git push origin ext-my-extension-v1.0.0
 ```
 
-CI then:
+CI then verifies the manifest exists and its `version` matches the tag,
+revalidates it against the schema, zips the extension directory and attaches
+`<slug>-v<version>.zip` to a GitHub Release. The catalog's `package_url`
+points at that asset, so installs run through the normal WordPress
+`Plugin_Upgrader` flow.
 
-1. Verifies `extensions/<slug>/fleekdash.json` exists and its `version`
-   matches the tag.
-2. Re-validates the manifest against the schema.
-3. Zips the extension directory and attaches it to a GitHub Release
-   (`<slug>-v<version>.zip`).
+## Contributing
 
-The catalog's `package_url` points at the release asset — installs run
-through WordPress `Plugin_Upgrader`, and update metadata comes from the
-FleekDash update endpoint.
-
-## Writing an extension
-
-Start from [`fleekdash/extension-starter`](https://github.com/fleekdash/extension-starter)
-— it is the same shape this repo uses (`fleekdash.json` + Registry routes +
-typed SDK via `@fleekdash/contracts`). Authoring guide, manifest field
-reference and the migration playbook live in the FleekDash monorepo docs
-(`docs/future/integration-system/`) until the public developer portal ships.
-
-To add an extension here: `extensions/<slug>/` + `fleekdash.json` +
-`pnpm install` at the root + a `typecheck`/`build` script — CI validates
-the manifest on every PR.
+Adding an extension here means one PR containing `extensions/<slug>/` with
+its `fleekdash.json`, a `typecheck`/`build` script and `pnpm install` run at
+the root. CI validates the manifest on every pull request. Docs and comments
+in English, one extension per PR.
 
 ## License
 
-GPL-2.0-or-later — extensions are WordPress derivatives.
+GPL-2.0-or-later. Extensions are WordPress derivatives, same as FleekDash
+itself.

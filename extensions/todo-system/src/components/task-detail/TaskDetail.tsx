@@ -95,7 +95,7 @@ export function TaskDetail({
     commit({ linked_post_ids: next });
   };
 
-  // sdk.openModal — renders the WP editor for the linked post in a
+  // sdk.openModal - renders the WP editor for the linked post in a
   // host-managed modal instead of leaving FleekDash (same-origin URL).
   const openLinkedPost = (post: { id: number; title: string }) => {
     const sdk = getFleekDashSdk();

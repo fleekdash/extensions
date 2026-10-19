@@ -22,7 +22,7 @@ type TodoShellProps = {
 export function TodoShell({ app, settings }: TodoShellProps) {
   const [projectModalOpen, setProjectModalOpen] = useState(false);
 
-  // sdk.navigate() — host-side hash routing to the second manifest route.
+  // sdk.navigate() - host-side hash routing to the second manifest route.
   const openApiDemo = () => {
     getFleekDashSdk()
       ?.navigate("/app/todo-system/api-demo")
@@ -163,7 +163,7 @@ export function TodoShell({ app, settings }: TodoShellProps) {
         <div className="todo-content">
           {app.tasksTruncated ? (
             <p className="todo-truncated-notice" role="status">
-              This site has {app.tasksTotal} tasks — showing the first{" "}
+              This site has {app.tasksTotal} tasks - showing the first{" "}
               {app.tasks.length}. Reload to refresh.
             </p>
           ) : null}
