@@ -22,10 +22,18 @@
         }
       })();
     </script>
-    <script
-      src="/wp-content/plugins/fleekdash/public/sdk/fleekdash-sdk.js"
-      vite-ignore
-    ></script>
+    <script>
+      (function loadFleekDashSdk() {
+        var sdkUrl = new URLSearchParams(window.location.search).get(
+          "fleekdash_sdk_url",
+        );
+        if (sdkUrl) {
+          document.write(
+            '<script src="' + sdkUrl.replace(/"/g, "&quot;") + '"><\\/script>',
+          );
+        }
+      })();
+    </script>
     <style>
       html,
       body,
