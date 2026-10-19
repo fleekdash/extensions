@@ -129,7 +129,11 @@ export function TaskDetail({
       ) => {
         if (input[field] === undefined) return;
         if (focusedField.current === field) return;
-        if (valuesRef.current[field] !== input[field]) return;
+        const local = valuesRef.current[field];
+        const submitted = input[field] as string;
+        // Blur submits trimmed title/section while the input keeps the
+        // raw text - both spellings count as "unchanged since submit".
+        if (local !== submitted && local.trim() !== submitted) return;
         set(taskRef.current[field]);
       };
       restore("title", setTitle);
