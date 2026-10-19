@@ -227,10 +227,10 @@ export function ApiDemo() {
                       status: "todo",
                     },
                   },
-                )) as { id?: number } | undefined;
-                const deleted = created?.id
+                )) as { task?: { id?: number } } | undefined;
+                const deleted = created?.task?.id
                   ? await sdk?.mutateWordPressData(
-                      `/todo-system/v1/tasks/${created.id}`,
+                      `/todo-system/v1/tasks/${created.task.id}`,
                       { method: "DELETE" },
                     )
                   : "skipped (no id)";
