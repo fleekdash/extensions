@@ -6,7 +6,7 @@ export type { FleekDashSdk };
 /**
  * Resolves with `window.FleekDashSDK` once it exists, or null after
  * `timeoutMs`. The page's loader writes the SDK tag via document.write
- * (parser-blocking), but async embeds can mount React before it executes —
+ * (parser-blocking), but async embeds can mount React before it executes -
  * polling briefly keeps first data calls from racing ahead of `sdk.init()`.
  */
 export function whenFleekDashSdk(

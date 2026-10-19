@@ -4,7 +4,7 @@ import { getFleekDashSdk } from "./fleekdash-sdk";
 const BADGE_ROUTE_PATH = "todo-system/app";
 
 /**
- * SDK only when init() already ran — bus messages sent earlier carry
+ * SDK only when init() already ran - bus messages sent earlier carry
  * integration_id:null and get rejected by the host.
  */
 function sdkReady() {
