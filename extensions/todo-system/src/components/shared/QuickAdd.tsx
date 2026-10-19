@@ -3,7 +3,7 @@ import { useState } from "react";
 type QuickAddProps = {
   readonly disabled?: boolean;
   readonly placeholder?: string;
-  readonly onAdd: (title: string) => Promise<void>;
+  readonly onAdd: (title: string) => Promise<boolean>;
 };
 
 export function QuickAdd({ disabled, placeholder, onAdd }: QuickAddProps) {
@@ -15,8 +15,10 @@ export function QuickAdd({ disabled, placeholder, onAdd }: QuickAddProps) {
     if (!value || pending) return;
     setPending(true);
     try {
-      await onAdd(value);
-      setTitle("");
+      // Keep the typed title on failure so the user can retry.
+      if (await onAdd(value)) {
+        setTitle("");
+      }
     } finally {
       setPending(false);
     }

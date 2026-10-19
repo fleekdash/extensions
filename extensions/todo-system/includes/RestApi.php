@@ -117,8 +117,11 @@ final class RestApi
             'success' => true,
             'projects' => RestProjectController::collectProjects(),
             'tasks' => $tasksResponse['tasks'] ?? [],
+            'tasks_total' => $tasksResponse['total'] ?? 0,
+            'tasks_truncated' => $tasksResponse['truncated'] ?? false,
             'users' => RestSupport::fetchUsers(),
             'current_user_id' => (int) \get_current_user_id(),
+            'admin_url' => \admin_url(),
         ]);
     }
 }

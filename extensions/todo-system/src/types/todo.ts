@@ -45,8 +45,11 @@ export type BootstrapResponse = {
   readonly success: boolean;
   readonly projects: readonly Project[];
   readonly tasks: readonly Task[];
+  readonly tasks_total: number;
+  readonly tasks_truncated: boolean;
   readonly users: readonly TodoUser[];
   readonly current_user_id: number;
+  readonly admin_url: string;
 };
 
 export type TaskInput = {

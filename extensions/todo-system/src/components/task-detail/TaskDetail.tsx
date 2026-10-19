@@ -17,15 +17,17 @@ import {
 type TaskDetailProps = {
   readonly task: Task;
   readonly users: readonly TodoUser[];
+  readonly adminUrl?: string;
   readonly saving?: boolean;
   readonly onClose: () => void;
-  readonly onUpdate: (id: number, input: Partial<TaskInput>) => Promise<void>;
-  readonly onDelete: (id: number) => Promise<void>;
+  readonly onUpdate: (id: number, input: Partial<TaskInput>) => Promise<unknown>;
+  readonly onDelete: (id: number) => Promise<unknown>;
 };
 
 export function TaskDetail({
   task,
   users,
+  adminUrl,
   saving,
   onClose,
   onUpdate,
@@ -51,6 +53,7 @@ export function TaskDetail({
     const timer = globalThis.setTimeout(() => {
       if (!postQuery.trim()) {
         setPostResults([]);
+        setSearchingPosts(false);
         return;
       }
       setSearchingPosts(true);
@@ -103,7 +106,7 @@ export function TaskDetail({
     sdk
       .openModal({
         title: `Edit: ${post.title}`,
-        url: `/wp-admin/post.php?post=${post.id}&action=edit`,
+        url: `${adminUrl || "/wp-admin/"}post.php?post=${post.id}&action=edit`,
         size: "3xl",
         direction: "right",
       })

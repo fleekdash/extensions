@@ -191,7 +191,7 @@ function fleekdashTaskSystemRegisterIntegration(): void
                     \plugins_url($appHtmlRelative, __FILE__)
                 ),
                 'icon' => 'check',
-                'permissions' => ['authenticated'],
+                'permissions' => ['edit_posts'],
                 'sandbox_mode' => 'none',
             ],
             [
@@ -203,7 +203,7 @@ function fleekdashTaskSystemRegisterIntegration(): void
                     \plugins_url($apiDemoHtmlRelative, __FILE__)
                 ),
                 'icon' => 'code',
-                'permissions' => ['authenticated'],
+                'permissions' => ['edit_posts'],
                 'sandbox_mode' => 'none',
             ],
         ],

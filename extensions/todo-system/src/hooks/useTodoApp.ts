@@ -58,10 +58,16 @@ export function useTodoApp(
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(settings.default_view);
   const [filters, setFilters] = useState<TodoFilters>(DEFAULT_FILTERS);
+  const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [adminUrl, setAdminUrl] = useState("");
+  const [tasksTruncated, setTasksTruncated] = useState(false);
+  const [tasksTotal, setTasksTotal] = useState(0);
   const bootedRef = useRef(false);
+  const userPickedViewRef = useRef(false);
+  const updateSeqRef = useRef(new Map<number, number>());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,6 +82,9 @@ export function useTodoApp(
       setTasks(data.tasks);
       setUsers(data.users);
       setCurrentUserId(data.current_user_id);
+      setAdminUrl(data.admin_url ?? "");
+      setTasksTotal(data.tasks_total ?? data.tasks.length);
+      setTasksTruncated(Boolean(data.tasks_truncated));
       setActiveProjectId((prev) => {
         if (prev && data.projects.some((p) => p.id === prev)) return prev;
         return data.projects[0]?.id ?? null;
@@ -94,10 +103,17 @@ export function useTodoApp(
   }, [enabled, load]);
 
   // `default_view` arrives asynchronously via getIntegrationSettings —
-  // apply it until the user picks a view explicitly.
+  // apply it only until the user picks a view explicitly.
   useEffect(() => {
-    setViewMode(settings.default_view);
+    if (!userPickedViewRef.current) {
+      setViewMode(settings.default_view);
+    }
   }, [settings.default_view]);
+
+  const chooseViewMode = useCallback((mode: ViewMode) => {
+    userPickedViewRef.current = true;
+    setViewMode(mode);
+  }, []);
 
   // Menu badge mirrors the open-task count when the setting is on.
   useEffect(() => {
@@ -132,9 +148,18 @@ export function useTodoApp(
           return false;
         }
         return true;
-      })
-      .slice(0, settings.tasks_per_page);
-  }, [projectTasks, filters, settings.tasks_per_page]);
+      });
+  }, [projectTasks, filters]);
+
+  const hiddenTaskCount = Math.max(
+    0,
+    filteredTasks.length - settings.tasks_per_page,
+  );
+  const visibleTasks = useMemo(
+    () =>
+      showAll ? filteredTasks : filteredTasks.slice(0, settings.tasks_per_page),
+    [filteredTasks, showAll, settings.tasks_per_page],
+  );
 
   const selectedTask = useMemo(
     () => tasks.find((task) => task.id === selectedTaskId) ?? null,
@@ -148,15 +173,17 @@ export function useTodoApp(
   }, [users]);
 
   const handleCreateProject = useCallback(
-    async (input: ProjectInput) => {
+    async (input: ProjectInput): Promise<boolean> => {
       setSaving(true);
       try {
         const project = await createProject(input);
         setProjects((prev) => [...prev, project]);
         setActiveProjectId(project.id);
         notify(`Project "${project.name}" created`, "success");
+        return true;
       } catch (err) {
         notify(errorMessage(err, "Could not create project"), "error");
+        return false;
       } finally {
         setSaving(false);
       }
@@ -198,8 +225,10 @@ export function useTodoApp(
   }, []);
 
   const handleCreateTask = useCallback(
-    async (input: Omit<TaskInput, "project_id"> & { project_id?: number }) => {
-      if (!activeProjectId && !input.project_id) return;
+    async (
+      input: Omit<TaskInput, "project_id"> & { project_id?: number },
+    ): Promise<boolean> => {
+      if (!activeProjectId && !input.project_id) return false;
       setSaving(true);
       try {
         const task = await createTask({
@@ -219,8 +248,10 @@ export function useTodoApp(
         );
         setSelectedTaskId(task.id);
         notify(`Task "${task.title}" created`, "success");
+        return true;
       } catch (err) {
         notify(errorMessage(err, "Could not create task"), "error");
+        return false;
       } finally {
         setSaving(false);
       }
@@ -229,14 +260,22 @@ export function useTodoApp(
   );
 
   const handleUpdateTask = useCallback(
-    async (id: number, input: Partial<TaskInput>) => {
+    async (id: number, input: Partial<TaskInput>): Promise<boolean> => {
+      // Ignore stale responses: rapid edits resolve out of order and an
+      // older response must never overwrite a newer one.
+      const seq = (updateSeqRef.current.get(id) ?? 0) + 1;
+      updateSeqRef.current.set(id, seq);
       setSaving(true);
       try {
         const task = await updateTask(id, input);
-        setTasks((prev) => prev.map((t) => (t.id === id ? task : t)));
+        if (updateSeqRef.current.get(id) === seq) {
+          setTasks((prev) => prev.map((t) => (t.id === id ? task : t)));
+        }
         sdkLog(settings, "task updated", { id, fields: Object.keys(input) });
+        return true;
       } catch (err) {
         notify(errorMessage(err, "Could not update task"), "error");
+        return false;
       } finally {
         setSaving(false);
       }
@@ -248,7 +287,20 @@ export function useTodoApp(
     setSaving(true);
     try {
       await deleteTask(id);
-      setTasks((prev) => prev.filter((t) => t.id !== id));
+      let removedProjectId = 0;
+      setTasks((prev) => {
+        removedProjectId = prev.find((t) => t.id === id)?.project_id ?? 0;
+        return prev.filter((t) => t.id !== id);
+      });
+      if (removedProjectId) {
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.id === removedProjectId
+              ? { ...project, count: Math.max(0, project.count - 1) }
+              : project,
+          ),
+        );
+      }
       setSelectedTaskId((prev) => (prev === id ? null : prev));
       notify("Task deleted", "info");
     } catch (err) {
@@ -266,21 +318,37 @@ export function useTodoApp(
     [handleUpdateTask],
   );
 
+  // Switching projects closes the detail pane — the selected task belongs
+  // to the previous project and must not stay open next to the new list.
+  const selectProject = useCallback((id: number | null) => {
+    setActiveProjectId(id);
+    setSelectedTaskId(null);
+    setShowAll(false);
+  }, []);
+
   return {
     projects,
-    tasks: filteredTasks,
+    tasks: visibleTasks,
     allProjectTasks: projectTasks,
+    filteredCount: filteredTasks.length,
+    hiddenTaskCount,
+    showAll,
+    setShowAll,
+    tasksTruncated,
+    tasksTotal,
+    adminUrl,
     users,
     usersById,
     currentUserId,
     activeProject,
     activeProjectId,
     setActiveProjectId,
+    selectProject,
     selectedTask,
     selectedTaskId,
     setSelectedTaskId,
     viewMode,
-    setViewMode,
+    setViewMode: chooseViewMode,
     filters,
     setFilters,
     loading,

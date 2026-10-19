@@ -71,6 +71,10 @@ final class RestSupport
             'order' => 'ASC',
         ]);
 
+        // Emails are PII — only expose them when the caller may list users
+        // (admins/editors). The assignee UI only needs name + avatar.
+        $canListUsers = \current_user_can('list_users');
+
         $result = [];
         foreach ($users as $user) {
             if (!$user instanceof \WP_User) {
@@ -79,7 +83,7 @@ final class RestSupport
             $result[] = [
                 'id' => (int) $user->ID,
                 'name' => $user->display_name,
-                'email' => $user->user_email,
+                'email' => $canListUsers ? $user->user_email : '',
                 'avatar' => (string) \get_avatar_url($user->ID, ['size' => 64]),
             ];
         }

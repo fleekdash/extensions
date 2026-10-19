@@ -22,10 +22,24 @@
         }
       })();
     </script>
-    <script
-      src="/wp-content/plugins/fleekdash/public/sdk/fleekdash-sdk.js"
-      
-    ></script>
+    <script>
+      (function loadFleekDashSdk() {
+        var raw =
+          new URLSearchParams(window.location.search).get(
+            "fleekdash_sdk_url",
+          ) || "/wp-content/plugins/fleekdash/public/sdk/fleekdash-sdk.js";
+        try {
+          var url = new URL(raw, window.location.origin);
+          // Same-origin only, and URL.href percent-encodes quotes, so the
+          // written tag cannot break out of its src attribute.
+          if (url.origin === window.location.origin) {
+            document.write('<script src="' + url.href + '"><\/script>');
+          }
+        } catch (error) {
+          console.warn("[Todo System] fleekdash_sdk_url rejected", error);
+        }
+      })();
+    </script>
     <style>
       html,
       body,
@@ -36,7 +50,7 @@
         overflow: hidden;
       }
     </style>
-    <script type="module" crossorigin src="../assets/app-cL3DZyvu.js"></script>
+    <script type="module" crossorigin src="../assets/app-BkVRnihx.js"></script>
     <link rel="modulepreload" crossorigin href="../assets/settings-CP4TYyxS.js">
     <link rel="stylesheet" crossorigin href="../assets/app-4BsqIc_g.css">
   </head>

@@ -69,7 +69,7 @@
       "title": "Task System",
       "component_url": "dist/pages/app.html",
       "icon": "check",
-      "permissions": ["authenticated"],
+      "permissions": ["edit_posts"],
       "sandbox_mode": "none"
     },
     {
@@ -77,7 +77,7 @@
       "title": "SDK API Demo",
       "component_url": "dist/pages/api-demo.html",
       "icon": "code",
-      "permissions": ["authenticated"],
+      "permissions": ["edit_posts"],
       "sandbox_mode": "none"
     }
   ]

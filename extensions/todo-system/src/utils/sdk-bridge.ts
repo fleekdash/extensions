@@ -21,6 +21,8 @@ export function notify(
     .catch(() => {});
 }
 
+let badgeDeclineLogged = false;
+
 /** Reflect the open-task count on the route's sidebar menu badge. */
 export function syncMenuBadge(
   settings: Pick<TodoSettings, "open_tasks_badge" | "badge_color">,
@@ -31,5 +33,20 @@ export function syncMenuBadge(
   const count = settings.open_tasks_badge ? openCount : 0;
   void sdk
     .updateMenuBadge(BADGE_ROUTE_PATH, count, settings.badge_color)
+    .then((result) => {
+      // Older hosts acknowledge the message but return updated:false —
+      // forward-compatible call, surface it once instead of failing loudly.
+      if (
+        !badgeDeclineLogged &&
+        result &&
+        typeof result === "object" &&
+        (result as { updated?: unknown }).updated === false
+      ) {
+        badgeDeclineLogged = true;
+        console.info(
+          "[todo-system] Host has no menu-badge support yet — updateMenuBadge was a no-op.",
+        );
+      }
+    })
     .catch(() => {});
 }

@@ -8,7 +8,7 @@ type ProjectModalProps = {
     name: string;
     description: string;
     color: string;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 };
 
 const COLORS = ["#2563eb", "#0ea5e9", "#059669", "#d97706", "#dc2626", "#7c3aed"];
@@ -139,8 +139,11 @@ export function ProjectModal({
                 name: name.trim(),
                 description: description.trim(),
                 color,
-              }).then(() => {
-                dialogRef.current?.close();
+              }).then((created) => {
+                // Only close on success — a failed create keeps the form.
+                if (created) {
+                  dialogRef.current?.close();
+                }
               });
             }}
           >

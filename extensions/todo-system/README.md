@@ -14,7 +14,7 @@ the code paths — each feature is implemented the way the host expects.
 | `getWordPressData` / `mutateWordPressData` (embedded via MessageBus, standalone via `X-WP-Nonce`) | `src/api/todo-api.ts` |
 | `getIntegrationSettings` driving real UI (default view, badge, per-page, placeholder, debug) | `src/App.tsx`, `src/hooks/useTodoApp.ts` |
 | `showNotification` on mutations/errors | `src/utils/sdk-bridge.ts`, `useTodoApp` |
-| `updateMenuBadge` mirroring open-task count | `src/utils/sdk-bridge.ts` |
+| `updateMenuBadge` mirroring open-task count | `src/utils/sdk-bridge.ts` (forward-compatible — hosts without badge support reply `updated:false`, logged once) |
 | `navigate` (host hash routing) | `TodoShell` "API tour" button |
 | `openModal` (host drawer, same-origin WP editor) | `TaskDetail` linked-posts |
 | `onMessage("THEME_CHANGED")` + theme preload | `src/App.tsx`, `pages/*.html` |

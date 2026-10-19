@@ -104,10 +104,10 @@ export function ApiDemo() {
     }
     sdk.init({
       integration_id: "todo-system",
-      debug: true,
+      debug: new URLSearchParams(window.location.search).has("sdk_debug"),
       deferReady: embedded,
     });
-    sdk.onMessage("THEME_CHANGED", (data) => {
+    const unsubscribe = sdk.onMessage("THEME_CHANGED", (data) => {
       themeChanges.current += 1;
       if (typeof data.isDarkMode === "boolean") {
         setTheme(data.isDarkMode ? "dark" : "light");
@@ -117,6 +117,7 @@ export function ApiDemo() {
     if (embedded) {
       sdk.reportReady().catch(() => {});
     }
+    return unsubscribe;
   }, [sdk, embedded]);
 
   const notify = (type: NotificationType) =>
@@ -292,7 +293,10 @@ export function ApiDemo() {
               run("modal", () =>
                 sdk?.openModal({
                   title: "Posts (via openModal)",
-                  url: "/wp-admin/edit.php",
+                  // Extension assets always live under wp-content — deriving
+                  // the admin URL from our own path stays correct on
+                  // subdirectory installs.
+                  url: `${window.location.origin}${window.location.pathname.split("/wp-content/")[0]}/wp-admin/edit.php`,
                   size: "xl",
                   direction: "right",
                 }),

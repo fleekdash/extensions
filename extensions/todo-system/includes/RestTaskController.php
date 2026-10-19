@@ -47,6 +47,8 @@ final class RestTaskController
         return \rest_ensure_response([
             'success' => true,
             'tasks' => $tasks,
+            'total' => (int) $query->found_posts,
+            'truncated' => $query->found_posts > \count($tasks),
         ]);
     }
 
@@ -61,6 +63,10 @@ final class RestTaskController
         }
 
         $projectId = (int) ($request->get_param('project_id') ?? 0);
+        if ($projectId > 0 && !\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
+            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        }
+
         $meta = self::buildTaskMetaFromRequest($request, true);
 
         $postId = \wp_insert_post([
@@ -76,7 +82,10 @@ final class RestTaskController
         }
 
         if ($projectId > 0) {
-            \wp_set_object_terms($postId, [$projectId], PostTypes::PROJECT_TAXONOMY);
+            $assigned = \wp_set_object_terms($postId, [$projectId], PostTypes::PROJECT_TAXONOMY);
+            if (\is_wp_error($assigned)) {
+                return $assigned;
+            }
         }
 
         self::persistTaskMeta($postId, $meta);
@@ -100,7 +109,10 @@ final class RestTaskController
             return $postError;
         }
 
-        self::applyTaskProject($taskId, $request);
+        $projectError = self::applyTaskProject($taskId, $request);
+        if ($projectError instanceof \WP_Error) {
+            return $projectError;
+        }
 
         $meta = self::buildTaskMetaFromRequest($request, false);
         if ($meta !== []) {
@@ -170,16 +182,26 @@ final class RestTaskController
         return \is_wp_error($result) ? $result : null;
     }
 
-    private static function applyTaskProject(int $taskId, \WP_REST_Request $request): void
+    /**
+     * @return \WP_Error|null
+     */
+    private static function applyTaskProject(int $taskId, \WP_REST_Request $request): ?\WP_Error
     {
         if ($request->get_param('project_id') === null) {
-            return;
+            return null;
         }
 
         $projectId = (int) $request->get_param('project_id');
-        if ($projectId > 0) {
-            \wp_set_object_terms($taskId, [$projectId], PostTypes::PROJECT_TAXONOMY);
+        if ($projectId <= 0) {
+            return null;
         }
+
+        if (!\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
+            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        }
+
+        $assigned = \wp_set_object_terms($taskId, [$projectId], PostTypes::PROJECT_TAXONOMY);
+        return \is_wp_error($assigned) ? $assigned : null;
     }
 
     /**

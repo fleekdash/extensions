@@ -37,11 +37,13 @@ export function App() {
 
     sdk.init({
       integration_id: "todo-system",
-      debug: true,
+      // SDK-level debug is opt-in via ?sdk_debug=1 — it can't wait for the
+      // async `debug_logging` setting, which gates sdkLog() instead.
+      debug: new URLSearchParams(window.location.search).has("sdk_debug"),
       deferReady: embedded,
     });
 
-    sdk.onMessage("THEME_CHANGED", (data) => {
+    const unsubscribeTheme = sdk.onMessage("THEME_CHANGED", (data) => {
       if (typeof data.isDarkMode === "boolean") {
         setTheme(data.isDarkMode ? "dark" : "light");
       }
@@ -63,6 +65,7 @@ export function App() {
         // Non-blocking if parent is slow.
       });
     }
+    return unsubscribeTheme;
   }, [embedded]);
 
   return <TodoShell app={app} settings={settings} />;

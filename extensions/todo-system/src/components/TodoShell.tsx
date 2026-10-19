@@ -60,7 +60,7 @@ export function TodoShell({ app, settings }: TodoShellProps) {
       <Sidebar
         projects={app.projects}
         activeProjectId={app.activeProjectId}
-        onSelectProject={app.setActiveProjectId}
+        onSelectProject={app.selectProject}
         onCreateProject={() => setProjectModalOpen(true)}
       />
 
@@ -161,12 +161,16 @@ export function TodoShell({ app, settings }: TodoShellProps) {
         </header>
 
         <div className="todo-content">
+          {app.tasksTruncated ? (
+            <p className="todo-truncated-notice" role="status">
+              This site has {app.tasksTotal} tasks — showing the first{" "}
+              {app.tasks.length}. Reload to refresh.
+            </p>
+          ) : null}
           <QuickAdd
             disabled={!app.activeProjectId || app.saving}
             placeholder={settings.quick_add_placeholder}
-            onAdd={async (title) => {
-              await app.handleCreateTask({ title });
-            }}
+            onAdd={(title) => app.handleCreateTask({ title })}
           />
 
           {app.viewMode === "list" ? (
@@ -188,6 +192,17 @@ export function TodoShell({ app, settings }: TodoShellProps) {
               }
             />
           )}
+
+          {app.hiddenTaskCount > 0 && !app.showAll ? (
+            <button
+              type="button"
+              className="todo-btn todo-btn-ghost"
+              onClick={() => app.setShowAll(true)}
+            >
+              Show all {app.filteredCount} tasks ({app.hiddenTaskCount} hidden by
+              the tasks-per-page setting)
+            </button>
+          ) : null}
         </div>
       </main>
 
@@ -195,6 +210,7 @@ export function TodoShell({ app, settings }: TodoShellProps) {
         <TaskDetail
           task={app.selectedTask}
           users={app.users}
+          adminUrl={app.adminUrl}
           saving={app.saving}
           onClose={() => app.setSelectedTaskId(null)}
           onUpdate={app.handleUpdateTask}
