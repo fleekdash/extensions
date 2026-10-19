@@ -92,8 +92,10 @@ export function useTodoApp(
     } catch (err) {
       // Cold/slow WP can exceed the SDK's 5s bus timeout — retry once
       // transparently before surfacing the error with a Retry button.
+      // (await, not return: keeps `loading` true until the retry settles.)
       if (attempt === 0 && /timeout/i.test(errorMessage(err, ""))) {
-        return load(1);
+        await load(1);
+        return;
       }
       setError(errorMessage(err, "Failed to load todo data"));
     } finally {

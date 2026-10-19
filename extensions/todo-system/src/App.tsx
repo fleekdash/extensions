@@ -35,14 +35,16 @@ export function App() {
 
     // Wait for the SDK global - enabling data before init() ran would send
     // bus messages with integration_id:null (observed boot race).
+    let attempts = 0;
+    const MAX_ATTEMPTS = 8; // ~14s of grace for a slow SDK script, then error UI
     const waitForSdk = () => {
-      void whenFleekDashSdk().then((sdk) => {
+      void whenFleekDashSdk(1500).then((sdk) => {
         if (cancelled) return;
         if (!sdk) {
-          // Embedded hosts may load the SDK after the polling timeout. Keep
-          // data gated so bootstrap cannot run before sdk.init(). Standalone
-          // development still works without the host SDK.
-          if (embedded) {
+          // Embedded hosts may load the SDK after the polling timeout — keep
+          // data gated while there's still hope, then enable so bootstrap can
+          // surface the honest "SDK is not available" error + Retry.
+          if (embedded && ++attempts < MAX_ATTEMPTS) {
             retryTimer = setTimeout(waitForSdk, 250);
           } else {
             setDataEnabled(true);

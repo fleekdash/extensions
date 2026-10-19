@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { NotificationType } from "@fleekdash/contracts";
 import {
+  getFleekDashSdk,
   whenFleekDashSdk,
   type FleekDashSdk,
 } from "../utils/fleekdash-sdk";
@@ -73,7 +74,7 @@ export function ApiDemo() {
   const [badgeCount, setBadgeCount] = useState(0);
   const themeChanges = useRef(0);
 
-  const [sdk, setSdk] = useState<FleekDashSdk | undefined>(undefined);
+  const [sdk, setSdk] = useState<FleekDashSdk | undefined>(getFleekDashSdk);
 
   const setRun = useCallback((key: string, state: RunState) => {
     setRuns((prev) => ({ ...prev, [key]: state }));
@@ -81,6 +82,10 @@ export function ApiDemo() {
 
   const run = useCallback(
     (key: string, fn: () => unknown) => {
+      if (!sdk?.isInitialized()) {
+        setRun(key, { status: "error", output: "SDK not initialized" });
+        return;
+      }
       setRun(key, { status: "running" });
       void Promise.resolve(fn())
         .then((result) =>
@@ -93,7 +98,7 @@ export function ApiDemo() {
           }),
         );
     },
-    [setRun],
+    [setRun, sdk],
   );
 
   useEffect(() => {
