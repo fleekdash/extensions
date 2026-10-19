@@ -1,0 +1,84 @@
+{
+  "$schema": "../../schema/fleekdash-manifest.schema.json",
+  "kind": "app",
+  "id": "todo-system",
+  "name": "Task System",
+  "description": "Reference FleekDash extension — Asana-style task management plus a live tour of every extension API capability.",
+  "version": "1.1.0",
+  "author": "FleekDash",
+  "author_uri": "https://fleekdash.com",
+  "icon": "check",
+  "category": "plugin",
+  "integration_type": "standalone",
+  "requires": {
+    "wp": "6.5",
+    "php": "8.0",
+    "fleekdash": "2.6.7"
+  },
+  "tags": ["tasks", "productivity", "reference", "sdk-demo"],
+  "settings": {
+    "default_view": {
+      "type": "select",
+      "label": "Default view",
+      "description": "View the app opens with.",
+      "options": { "list": "List", "board": "Board" },
+      "default": "list"
+    },
+    "open_tasks_badge": {
+      "type": "toggle",
+      "label": "Open-task menu badge",
+      "description": "Show the number of open tasks on the Task System menu item.",
+      "default": true
+    },
+    "badge_color": {
+      "type": "select",
+      "label": "Badge color",
+      "options": {
+        "blue": "Blue",
+        "green": "Green",
+        "red": "Red",
+        "purple": "Purple"
+      },
+      "default": "blue"
+    },
+    "tasks_per_page": {
+      "type": "number",
+      "label": "Tasks per page",
+      "description": "Soft cap for the list view.",
+      "min": 5,
+      "max": 100,
+      "step": 5,
+      "default": 50
+    },
+    "quick_add_placeholder": {
+      "type": "string",
+      "label": "Quick-add placeholder",
+      "description": "Placeholder text for the inline task input.",
+      "default": "Add a task…"
+    },
+    "debug_logging": {
+      "type": "toggle",
+      "label": "SDK debug logging",
+      "description": "Log SDK calls through the FleekDash debug channel.",
+      "default": false
+    }
+  },
+  "routes": [
+    {
+      "path": "todo-system/app",
+      "title": "Task System",
+      "component_url": "dist/pages/app.html",
+      "icon": "check",
+      "permissions": ["authenticated"],
+      "sandbox_mode": "none"
+    },
+    {
+      "path": "todo-system/api-demo",
+      "title": "SDK API Demo",
+      "component_url": "dist/pages/api-demo.html",
+      "icon": "code",
+      "permissions": ["authenticated"],
+      "sandbox_mode": "none"
+    }
+  ]
+}

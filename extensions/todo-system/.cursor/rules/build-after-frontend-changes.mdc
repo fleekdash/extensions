@@ -1,0 +1,17 @@
+# Todo System plugin — build after frontend changes
+
+This plugin is a **standalone Vite bundle** registered with FleekDash via `component_url` → **`dist/pages/app.html`**.
+
+```bash
+pnpm run build
+```
+
+## Run build after editing
+
+- `src/**`
+- `pages/**`
+- `vite.config.ts`
+
+## After build
+
+Hard-reload FleekDash route `#/app/todo-system/app`.
