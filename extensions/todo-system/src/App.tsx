@@ -41,7 +41,7 @@ export function App() {
       void whenFleekDashSdk(1500).then((sdk) => {
         if (cancelled) return;
         if (!sdk) {
-          // Embedded hosts may load the SDK after the polling timeout — keep
+          // Embedded hosts may load the SDK after the polling timeout - keep
           // data gated while there's still hope, then enable so bootstrap can
           // surface the honest "SDK is not available" error + Retry.
           if (embedded && ++attempts < MAX_ATTEMPTS) {
@@ -66,7 +66,7 @@ export function App() {
           }
         });
 
-        // Manifest-declared extension settings (fleekdash.json → settings) —
+        // Manifest-declared extension settings (fleekdash.json → settings) -
         // the host resolves defaults + stored values server-side.
         sdk
           .getIntegrationSettings?.()

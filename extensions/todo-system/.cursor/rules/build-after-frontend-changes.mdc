@@ -1,4 +1,4 @@
-# Todo System plugin — build after frontend changes
+# Todo System plugin - build after frontend changes
 
 This plugin is a **standalone Vite bundle** registered with FleekDash via `component_url` → **`dist/pages/app.html`**.
 
