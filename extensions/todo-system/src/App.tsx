@@ -20,7 +20,9 @@ function resolveTheme(): "light" | "dark" {
 export function App() {
   const [theme, setTheme] = useState<"light" | "dark">(resolveTheme);
   const embedded = isFleekDashEmbedded();
-  const [dataEnabled, setDataEnabled] = useState(!embedded);
+  // Data stays gated until the SDK wait resolves - standalone or embedded,
+  // bootstrap must never run before sdk.init() (or an honest "no SDK" error).
+  const [dataEnabled, setDataEnabled] = useState(false);
   const [settings, setSettings] = useState<TodoSettings>(DEFAULT_TODO_SETTINGS);
   const app = useTodoApp(dataEnabled, settings);
 
@@ -41,10 +43,10 @@ export function App() {
       void whenFleekDashSdk(1500).then((sdk) => {
         if (cancelled) return;
         if (!sdk) {
-          // Embedded hosts may load the SDK after the polling timeout - keep
-          // data gated while there's still hope, then enable so bootstrap can
-          // surface the honest "SDK is not available" error + Retry.
-          if (embedded && ++attempts < MAX_ATTEMPTS) {
+          // The script may land after the first timeout - keep polling
+          // while there's still hope, then enable so bootstrap surfaces
+          // the honest "SDK is not available" error + Retry.
+          if (++attempts < MAX_ATTEMPTS) {
             retryTimer = setTimeout(waitForSdk, 250);
           } else {
             setDataEnabled(true);

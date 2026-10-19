@@ -108,33 +108,47 @@ export function ApiDemo() {
   useEffect(() => {
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
-    void whenFleekDashSdk().then((found) => {
-      if (cancelled) return;
-      if (!found) {
-        setSdkReady(false);
-        return;
-      }
-      found.init({
-        integration_id: "todo-system",
-        debug: new URLSearchParams(window.location.search).has("sdk_debug"),
-        deferReady: embedded,
-      });
-      unsubscribe = found.onMessage("THEME_CHANGED", (data) => {
-        themeChanges.current += 1;
-        if (typeof data.isDarkMode === "boolean") {
-          setTheme(data.isDarkMode ? "dark" : "light");
+    // Same wait pattern as App: the SDK script loads async, so poll until
+    // it exists (then give up and show the "not found" state).
+    let attempts = 0;
+    const MAX_ATTEMPTS = 8;
+    const waitForSdk = () => {
+      void whenFleekDashSdk(1500).then((found) => {
+        if (cancelled) return;
+        if (!found) {
+          if (++attempts < MAX_ATTEMPTS) {
+            retryTimer = setTimeout(waitForSdk, 250);
+          } else {
+            setSdkReady(false);
+          }
+          return;
+        }
+        found.init({
+          integration_id: "todo-system",
+          debug: new URLSearchParams(window.location.search).has("sdk_debug"),
+          deferReady: embedded,
+        });
+        unsubscribe = found.onMessage("THEME_CHANGED", (data) => {
+          themeChanges.current += 1;
+          if (typeof data.isDarkMode === "boolean") {
+            setTheme(data.isDarkMode ? "dark" : "light");
+          }
+        });
+        setSdk(found);
+        setSdkReady(true);
+        if (embedded) {
+          found.reportReady().catch(() => {});
         }
       });
-      setSdk(found);
-      setSdkReady(true);
-      if (embedded) {
-        found.reportReady().catch(() => {});
-      }
-    });
+    };
+
+    waitForSdk();
 
     return () => {
       cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
       unsubscribe?.();
     };
   }, [embedded]);

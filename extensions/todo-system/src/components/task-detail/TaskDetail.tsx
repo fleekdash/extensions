@@ -42,15 +42,14 @@ export function TaskDetail({
   >([]);
   const [searchingPosts, setSearchingPosts] = useState(false);
 
-  // Reset local inputs only when switching tasks — syncing on every task
-  // prop change lets a late mutation response clobber unsubmitted typing.
-  const lastTaskId = useRef(task.id);
+  // Sync server values into untouched fields only - a late mutation
+  // response must never clobber the field the user is editing.
+  const focusedField = useRef<string | null>(null);
   useEffect(() => {
-    if (lastTaskId.current === task.id) return;
-    lastTaskId.current = task.id;
-    setTitle(task.title);
-    setDescription(task.description);
-    setSection(task.section);
+    if (focusedField.current !== "title") setTitle(task.title);
+    if (focusedField.current !== "description")
+      setDescription(task.description);
+    if (focusedField.current !== "section") setSection(task.section);
   }, [task]);
 
   useEffect(() => {
@@ -126,7 +125,11 @@ export function TaskDetail({
             className="todo-title-input"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
+            onFocus={() => {
+              focusedField.current = "title";
+            }}
             onBlur={() => {
+              focusedField.current = null;
               if (title.trim() && title.trim() !== task.title) {
                 commit({ title: title.trim() });
               }
@@ -193,7 +196,11 @@ export function TaskDetail({
             className="todo-input"
             value={section}
             onChange={(event) => setSection(event.target.value)}
+            onFocus={() => {
+              focusedField.current = "section";
+            }}
             onBlur={() => {
+              focusedField.current = null;
               if (section.trim() && section.trim() !== task.section) {
                 commit({ section: section.trim() });
               }
@@ -208,7 +215,11 @@ export function TaskDetail({
             className="todo-textarea"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            onFocus={() => {
+              focusedField.current = "description";
+            }}
             onBlur={() => {
+              focusedField.current = null;
               if (description !== task.description) {
                 commit({ description });
               }
