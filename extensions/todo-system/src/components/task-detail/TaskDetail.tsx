@@ -20,7 +20,7 @@ type TaskDetailProps = {
   readonly adminUrl?: string;
   readonly saving?: boolean;
   readonly onClose: () => void;
-  readonly onUpdate: (id: number, input: Partial<TaskInput>) => Promise<unknown>;
+  readonly onUpdate: (id: number, input: Partial<TaskInput>) => Promise<boolean>;
   readonly onDelete: (id: number) => Promise<unknown>;
 };
 
@@ -105,12 +105,22 @@ export function TaskDetail({
   }, [postQuery]);
 
   const commit = (input: Partial<TaskInput>) => {
-    if (input.title !== undefined) pendingEdits.current.title = input.title;
-    if (input.description !== undefined)
-      pendingEdits.current.description = input.description;
-    if (input.section !== undefined)
-      pendingEdits.current.section = input.section;
-    void onUpdate(task.id, input);
+    const edited = (["title", "description", "section"] as const).filter(
+      (field) => input[field] !== undefined,
+    );
+    for (const field of edited) {
+      pendingEdits.current[field] = input[field] as string;
+    }
+    void onUpdate(task.id, input).then((ok) => {
+      for (const field of edited) delete pendingEdits.current[field];
+      if (!ok) {
+        // Rejected edit - put the server's values back in the fields.
+        if (input.title !== undefined) setTitle(task.title);
+        if (input.description !== undefined)
+          setDescription(task.description);
+        if (input.section !== undefined) setSection(task.section);
+      }
+    });
   };
 
   const toggleAssignee = (userId: number) => {
