@@ -35,10 +35,16 @@
           if (url.origin === window.location.origin) {
             var script = document.createElement("script");
             script.src = url.href;
+            script.onerror = function () {
+              window.__fleekdashSdkLoadFailed = true;
+            };
             document.head.appendChild(script);
+          } else {
+            window.__fleekdashSdkLoadFailed = true;
           }
         } catch (error) {
           console.warn("[Todo System] fleekdash_sdk_url rejected", error);
+          window.__fleekdashSdkLoadFailed = true;
         }
       })();
     </script>

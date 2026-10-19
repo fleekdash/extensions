@@ -20,7 +20,11 @@ export function whenFleekDashSdk(
     const started = Date.now();
     const tick = () => {
       const sdk = getFleekDashSdk();
-      if (sdk || Date.now() - started >= timeoutMs) {
+      // The page loader sets this flag when the script can't arrive at all
+      // (network error or rejected URL) - no point polling the full timeout.
+      const failed = (window as unknown as Record<string, unknown>)
+        .__fleekdashSdkLoadFailed === true;
+      if (sdk || failed || Date.now() - started >= timeoutMs) {
         resolve(sdk ?? null);
         return;
       }

@@ -43,10 +43,13 @@ export function App() {
       void whenFleekDashSdk(1500).then((sdk) => {
         if (cancelled) return;
         if (!sdk) {
-          // The SDK may load after the polling timeout — keep data gated
-          // while there's still hope, then enable so bootstrap can surface the
-          // honest "SDK is not available" error + Retry.
-          if (++attempts < MAX_ATTEMPTS) {
+          // The script may land after the first timeout - keep polling
+          // while there's still hope, then enable so bootstrap surfaces
+          // the honest "SDK is not available" error + Retry. A loader-
+          // reported failure means nothing is coming, so don't wait.
+          const loadFailed = (window as unknown as Record<string, unknown>)
+            .__fleekdashSdkLoadFailed === true;
+          if (!loadFailed && ++attempts < MAX_ATTEMPTS) {
             retryTimer = setTimeout(waitForSdk, 250);
           } else {
             setDataEnabled(true);

@@ -62,9 +62,9 @@ final class RestTaskController
             return new \WP_Error('invalid_title', 'Task title is required', ['status' => 400]);
         }
 
-        $projectId = (int) ($request->get_param('project_id') ?? 0);
-        if ($projectId > 0 && !\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
-            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        $projectError = self::invalidProjectError((int) ($request->get_param('project_id') ?? 0));
+        if ($projectError !== null) {
+            return $projectError;
         }
 
         $meta = self::buildTaskMetaFromRequest($request, true);
@@ -192,14 +192,18 @@ final class RestTaskController
     /**
      * @return \WP_Error|null
      */
-    private static function validateTaskProjectParam(\WP_REST_Request $request): ?\WP_Error
+    private static function invalidProjectError(int $projectId): ?\WP_Error
     {
-        $projectId = (int) $request->get_param('project_id');
         if ($projectId > 0 && !\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
             return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
         }
 
         return null;
+    }
+
+    private static function validateTaskProjectParam(\WP_REST_Request $request): ?\WP_Error
+    {
+        return self::invalidProjectError((int) $request->get_param('project_id'));
     }
 
     /**
@@ -216,8 +220,8 @@ final class RestTaskController
             return null;
         }
 
-        if (!\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
-            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        if (($projectError = self::invalidProjectError($projectId)) !== null) {
+            return $projectError;
         }
 
         $assigned = \wp_set_object_terms($taskId, [$projectId], PostTypes::PROJECT_TAXONOMY);

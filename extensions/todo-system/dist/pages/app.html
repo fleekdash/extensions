@@ -35,10 +35,16 @@
           if (url.origin === window.location.origin) {
             var script = document.createElement("script");
             script.src = url.href;
+            script.onerror = function () {
+              window.__fleekdashSdkLoadFailed = true;
+            };
             document.head.appendChild(script);
+          } else {
+            window.__fleekdashSdkLoadFailed = true;
           }
         } catch (error) {
           console.warn("[Todo System] fleekdash_sdk_url rejected", error);
+          window.__fleekdashSdkLoadFailed = true;
         }
       })();
     </script>
@@ -52,8 +58,8 @@
         overflow: hidden;
       }
     </style>
-    <script type="module" crossorigin src="../assets/app-Cf-v4r5A.js"></script>
-    <link rel="modulepreload" crossorigin href="../assets/settings-C1F3H_oZ.js">
+    <script type="module" crossorigin src="../assets/app-C-ks8npE.js"></script>
+    <link rel="modulepreload" crossorigin href="../assets/settings-Fj8ExrGN.js">
     <link rel="stylesheet" crossorigin href="../assets/app-4BsqIc_g.css">
   </head>
   <body>
