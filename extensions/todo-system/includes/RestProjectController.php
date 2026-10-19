@@ -81,6 +81,25 @@ final class RestProjectController
     public static function deleteProject(\WP_REST_Request $request)
     {
         $termId = (int) $request->get_param('id');
+        $taskIds = \get_posts([
+            'post_type' => PostTypes::TASK_POST_TYPE,
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [
+                [
+                    'taxonomy' => PostTypes::PROJECT_TAXONOMY,
+                    'field' => 'term_id',
+                    'terms' => [$termId],
+                ],
+            ],
+        ]);
+        foreach ($taskIds as $taskId) {
+            if (!\wp_delete_post((int) $taskId, true)) {
+                return new \WP_Error('delete_failed', 'Failed to delete project tasks', ['status' => 500]);
+            }
+        }
+
         $deleted = \wp_delete_term($termId, PostTypes::PROJECT_TAXONOMY);
 
         if (\is_wp_error($deleted) || $deleted === false) {

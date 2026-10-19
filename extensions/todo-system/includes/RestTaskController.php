@@ -219,7 +219,9 @@ final class RestTaskController
                 ),
                 'sort_order' => (int) ($request->get_param('sort_order') ?? time()),
                 'assignee_ids' => RestSupport::sanitizeIntArray($request->get_param('assignee_ids')),
-                'linked_post_ids' => RestSupport::sanitizeIntArray($request->get_param('linked_post_ids')),
+                'linked_post_ids' => self::filterReadableLinkedPostIds(
+                    RestSupport::sanitizeIntArray($request->get_param('linked_post_ids')),
+                ),
             ];
         }
 
@@ -251,7 +253,9 @@ final class RestTaskController
             $meta['assignee_ids'] = RestSupport::sanitizeIntArray($request->get_param('assignee_ids'));
         }
         if ($request->get_param('linked_post_ids') !== null) {
-            $meta['linked_post_ids'] = RestSupport::sanitizeIntArray($request->get_param('linked_post_ids'));
+            $meta['linked_post_ids'] = self::filterReadableLinkedPostIds(
+                RestSupport::sanitizeIntArray($request->get_param('linked_post_ids')),
+            );
         }
 
         return $meta;
@@ -313,8 +317,10 @@ final class RestTaskController
         $assigneeIds = RestSupport::sanitizeIntArray(
             \get_post_meta($post->ID, 'fd_task_assignee_ids', true),
         );
-        $linkedPostIds = RestSupport::sanitizeIntArray(
-            \get_post_meta($post->ID, 'fd_task_linked_post_ids', true),
+        $linkedPostIds = self::filterReadableLinkedPostIds(
+            RestSupport::sanitizeIntArray(
+                \get_post_meta($post->ID, 'fd_task_linked_post_ids', true),
+            ),
         );
 
         return [
@@ -343,12 +349,29 @@ final class RestTaskController
 
     /**
      * @param list<int> $ids
+     * @return list<int>
+     */
+    private static function filterReadableLinkedPostIds(array $ids): array
+    {
+        $readable = [];
+        foreach ($ids as $id) {
+            $linked = \get_post($id);
+            if ($linked instanceof \WP_Post && \current_user_can('read_post', $linked->ID)) {
+                $readable[] = (int) $linked->ID;
+            }
+        }
+
+        return $readable;
+    }
+
+    /**
+     * @param list<int> $ids
      * @return list<array{id:int,title:string,link:string,status:string}>
      */
     private static function resolveLinkedPosts(array $ids): array
     {
         $result = [];
-        foreach ($ids as $id) {
+        foreach (self::filterReadableLinkedPostIds($ids) as $id) {
             $linked = \get_post($id);
             if (!$linked instanceof \WP_Post) {
                 continue;
