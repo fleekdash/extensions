@@ -58,7 +58,7 @@ function fleekdashExcalidrawRegisterIntegration(): void
     }
 
     // Do not expose an integration whose declared FleekDash requirement is unmet.
-    if (\defined('FLEEKDASH_VERSION') && \version_compare((string) FLEEKDASH_VERSION, FLEEKDASH_EXCALIDRAW_MIN_FD, '<')) {
+    if (!\defined('FLEEKDASH_VERSION') || \version_compare((string) FLEEKDASH_VERSION, FLEEKDASH_EXCALIDRAW_MIN_FD, '<')) {
         return;
     }
 
