@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo System - FleekDash</title>
+    <script>
+      (function preloadFleekDashTheme() {
+        try {
+          var cssHref = localStorage.getItem("fleekdash:globals-css");
+          if (!cssHref && window.frameElement) {
+            cssHref = window.frameElement.dataset.globalsCss;
+          }
+          if (cssHref) {
+            var link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = cssHref;
+            document.head.appendChild(link);
+          }
+        } catch (error) {
+          console.warn("[Todo System] Theme CSS preload skipped", error);
+        }
+      })();
+    </script>
+    <script>
+      (function loadFleekDashSdk() {
+        var raw =
+          new URLSearchParams(window.location.search).get(
+            "fleekdash_sdk_url",
+          ) || "/wp-content/plugins/fleekdash/public/sdk/fleekdash-sdk.js";
+        try {
+          var url = new URL(raw, window.location.origin);
+          // Same-origin only, and URL.href percent-encodes quotes, so the
+          // written tag cannot break out of its src attribute.
+          if (url.origin === window.location.origin) {
+            document.write('<script src="' + url.href + '"><\/script>');
+          }
+        } catch (error) {
+          console.warn("[Todo System] fleekdash_sdk_url rejected", error);
+        }
+      })();
+    </script>
+    <style>
+      html,
+      body,
+      #root {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "fleekdash/todo-system",
+  "description": "Reference FleekDash extension — task management app plus live tour of every extension API capability",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "FleekDashTodoSystem\\": "includes/"
+    }
+  },
+  "scripts": {
+    "install-frontend": "pnpm install --frozen-lockfile",
+    "build-frontend": "pnpm run build",
+    "verify-dist": "@php scripts/verify-dist.php",
+    "build": [
+      "Composer\\Config::disableProcessTimeout",
+      "@install-frontend",
+      "@build-frontend",
+      "@verify-dist"
+    ]
+  },
+  "config": {
+    "process-timeout": 0,
+    "sort-packages": true
+  }
+}

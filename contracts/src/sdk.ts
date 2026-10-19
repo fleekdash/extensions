@@ -38,6 +38,12 @@ export interface FleekDashSdkConfig {
   integration_id: string;
   /** Server-provided nonce (injected into the iframe URL/config). */
   nonce?: string;
+  /**
+   * `wp_rest` nonce for standalone (non-iframe) REST calls — read from
+   * `_fleekdash_rest_nonce` / `data-rest-nonce`, or supplied here directly.
+   * Distinct from `nonce`, which authenticates MessageBus traffic only.
+   */
+  restNonce?: string;
   debug?: boolean;
   /** Defer the automatic INTEGRATION_READY signal until reportReady(). */
   deferReady?: boolean;
