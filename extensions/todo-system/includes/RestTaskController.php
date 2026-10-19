@@ -104,6 +104,13 @@ final class RestTaskController
             return $loadError;
         }
 
+        // Validate the requested project before writing post fields, so a
+        // rejected assignment cannot leave a partially-updated task behind.
+        $projectError = self::validateTaskProjectParam($request);
+        if ($projectError instanceof \WP_Error) {
+            return $projectError;
+        }
+
         $postError = self::applyTaskPostFields($taskId, $request);
         if ($postError instanceof \WP_Error) {
             return $postError;
@@ -180,6 +187,19 @@ final class RestTaskController
 
         $result = \wp_update_post($update, true);
         return \is_wp_error($result) ? $result : null;
+    }
+
+    /**
+     * @return \WP_Error|null
+     */
+    private static function validateTaskProjectParam(\WP_REST_Request $request): ?\WP_Error
+    {
+        $projectId = (int) $request->get_param('project_id');
+        if ($projectId > 0 && !\term_exists($projectId, PostTypes::PROJECT_TAXONOMY)) {
+            return new \WP_Error('invalid_project', 'Project not found', ['status' => 400]);
+        }
+
+        return null;
     }
 
     /**

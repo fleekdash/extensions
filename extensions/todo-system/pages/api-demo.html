@@ -30,10 +30,12 @@
           ) || "/wp-content/plugins/fleekdash/public/sdk/fleekdash-sdk.js";
         try {
           var url = new URL(raw, window.location.origin);
-          // Same-origin only, and URL.href percent-encodes quotes, so the
-          // written tag cannot break out of its src attribute.
+          // Same-origin only; the app polls for window.FleekDashSDK
+          // (whenFleekDashSdk) so async script loading is safe.
           if (url.origin === window.location.origin) {
-            document.write('<script src="' + url.href + '"><\/script>');
+            var script = document.createElement("script");
+            script.src = url.href;
+            document.head.appendChild(script);
           }
         } catch (error) {
           console.warn("[Todo System] fleekdash_sdk_url rejected", error);

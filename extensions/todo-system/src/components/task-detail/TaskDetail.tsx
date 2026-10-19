@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { searchPosts } from "../../api/todo-api";
 import type {
   Task,
@@ -42,11 +42,16 @@ export function TaskDetail({
   >([]);
   const [searchingPosts, setSearchingPosts] = useState(false);
 
+  // Reset local inputs only when switching tasks — syncing on every task
+  // prop change lets a late mutation response clobber unsubmitted typing.
+  const lastTaskId = useRef(task.id);
   useEffect(() => {
+    if (lastTaskId.current === task.id) return;
+    lastTaskId.current = task.id;
     setTitle(task.title);
     setDescription(task.description);
     setSection(task.section);
-  }, [task.id, task.title, task.description, task.section]);
+  }, [task]);
 
   useEffect(() => {
     let cancelled = false;
