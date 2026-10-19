@@ -42,14 +42,39 @@ export function TaskDetail({
   >([]);
   const [searchingPosts, setSearchingPosts] = useState(false);
 
-  // Sync server values into untouched fields only - a late mutation
-  // response must never clobber the field the user is editing.
+  // Sync server values into safe fields only - never clobber the field
+  // being edited, and never overwrite a submitted-but-unconfirmed edit
+  // (a stale interim response would revert the input otherwise).
   const focusedField = useRef<string | null>(null);
+  const pendingEdits = useRef<
+    Partial<Record<"title" | "description" | "section", string>>
+  >({});
+  const lastTaskId = useRef(task.id);
   useEffect(() => {
-    if (focusedField.current !== "title") setTitle(task.title);
-    if (focusedField.current !== "description")
+    if (lastTaskId.current !== task.id) {
+      lastTaskId.current = task.id;
+      pendingEdits.current = {};
+      focusedField.current = null;
+      setTitle(task.title);
       setDescription(task.description);
-    if (focusedField.current !== "section") setSection(task.section);
+      setSection(task.section);
+      return;
+    }
+    const maybeSync = (
+      field: "title" | "description" | "section",
+      server: string,
+      set: (value: string) => void,
+    ) => {
+      const pending = pendingEdits.current[field];
+      if (pending !== undefined) {
+        if (server === pending) delete pendingEdits.current[field];
+        else return;
+      }
+      if (focusedField.current !== field) set(server);
+    };
+    maybeSync("title", task.title, setTitle);
+    maybeSync("description", task.description, setDescription);
+    maybeSync("section", task.section, setSection);
   }, [task]);
 
   useEffect(() => {
@@ -80,6 +105,11 @@ export function TaskDetail({
   }, [postQuery]);
 
   const commit = (input: Partial<TaskInput>) => {
+    if (input.title !== undefined) pendingEdits.current.title = input.title;
+    if (input.description !== undefined)
+      pendingEdits.current.description = input.description;
+    if (input.section !== undefined)
+      pendingEdits.current.section = input.section;
     void onUpdate(task.id, input);
   };
 
