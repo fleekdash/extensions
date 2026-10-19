@@ -3,20 +3,29 @@ import { getFleekDashSdk } from "./fleekdash-sdk";
 
 const BADGE_ROUTE_PATH = "todo-system/app";
 
+/**
+ * SDK only when init() already ran — bus messages sent earlier carry
+ * integration_id:null and get rejected by the host.
+ */
+function sdkReady() {
+  const sdk = getFleekDashSdk();
+  return sdk?.isInitialized() ? sdk : undefined;
+}
+
 /** Host-channel debug log, gated by the `debug_logging` setting. */
 export function sdkLog(
   settings: Pick<TodoSettings, "debug_logging">,
   ...args: unknown[]
 ): void {
   if (!settings.debug_logging) return;
-  getFleekDashSdk()?.log("[todo-system]", ...args);
+  sdkReady()?.log("[todo-system]", ...args);
 }
 
 export function notify(
   message: string,
   type: "success" | "error" | "warning" | "info" = "info",
 ): void {
-  void getFleekDashSdk()
+  void sdkReady()
     ?.showNotification(message, type)
     .catch(() => {});
 }
@@ -28,7 +37,7 @@ export function syncMenuBadge(
   settings: Pick<TodoSettings, "open_tasks_badge" | "badge_color">,
   openCount: number,
 ): void {
-  const sdk = getFleekDashSdk();
+  const sdk = sdkReady();
   if (!sdk?.updateMenuBadge) return;
   const count = settings.open_tasks_badge ? openCount : 0;
   void sdk

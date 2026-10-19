@@ -69,7 +69,7 @@ export function useTodoApp(
   const userPickedViewRef = useRef(false);
   const updateSeqRef = useRef(new Map<number, number>());
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (attempt = 0) => {
     setLoading(true);
     setError(null);
     try {
@@ -90,6 +90,13 @@ export function useTodoApp(
         return data.projects[0]?.id ?? null;
       });
     } catch (err) {
+      // Cold/slow WP can exceed the SDK's 5s bus timeout — retry once
+      // transparently before surfacing the error with a Retry button.
+      // (await, not return: keeps `loading` true until the retry settles.)
+      if (attempt === 0 && /timeout/i.test(errorMessage(err, ""))) {
+        await load(1);
+        return;
+      }
       setError(errorMessage(err, "Failed to load todo data"));
     } finally {
       setLoading(false);

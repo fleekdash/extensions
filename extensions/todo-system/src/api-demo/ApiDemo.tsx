@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { NotificationType } from "@fleekdash/contracts";
-import { getFleekDashSdk } from "../utils/fleekdash-sdk";
+import {
+  getFleekDashSdk,
+  whenFleekDashSdk,
+  type FleekDashSdk,
+} from "../utils/fleekdash-sdk";
 import { isFleekDashEmbedded } from "../utils/fleekdash-embed";
 import { normalizeTodoSettings } from "../types/settings";
 
@@ -70,7 +74,7 @@ export function ApiDemo() {
   const [badgeCount, setBadgeCount] = useState(0);
   const themeChanges = useRef(0);
 
-  const sdk = getFleekDashSdk();
+  const [sdk, setSdk] = useState<FleekDashSdk | undefined>(getFleekDashSdk);
 
   const setRun = useCallback((key: string, state: RunState) => {
     setRuns((prev) => ({ ...prev, [key]: state }));
@@ -78,6 +82,10 @@ export function ApiDemo() {
 
   const run = useCallback(
     (key: string, fn: () => unknown) => {
+      if (!sdk?.isInitialized()) {
+        setRun(key, { status: "error", output: "SDK not initialized" });
+        return;
+      }
       setRun(key, { status: "running" });
       void Promise.resolve(fn())
         .then((result) =>
@@ -90,7 +98,7 @@ export function ApiDemo() {
           }),
         );
     },
-    [setRun],
+    [setRun, sdk],
   );
 
   useEffect(() => {
@@ -98,27 +106,38 @@ export function ApiDemo() {
   }, [theme]);
 
   useEffect(() => {
-    if (!sdk) {
-      setSdkReady(false);
-      return;
-    }
-    sdk.init({
-      integration_id: "todo-system",
-      debug: new URLSearchParams(window.location.search).has("sdk_debug"),
-      deferReady: embedded,
-    });
-    const unsubscribe = sdk.onMessage("THEME_CHANGED", (data) => {
-      themeChanges.current += 1;
-      if (typeof data.isDarkMode === "boolean") {
-        setTheme(data.isDarkMode ? "dark" : "light");
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+
+    void whenFleekDashSdk().then((found) => {
+      if (cancelled) return;
+      if (!found) {
+        setSdkReady(false);
+        return;
+      }
+      found.init({
+        integration_id: "todo-system",
+        debug: new URLSearchParams(window.location.search).has("sdk_debug"),
+        deferReady: embedded,
+      });
+      unsubscribe = found.onMessage("THEME_CHANGED", (data) => {
+        themeChanges.current += 1;
+        if (typeof data.isDarkMode === "boolean") {
+          setTheme(data.isDarkMode ? "dark" : "light");
+        }
+      });
+      setSdk(found);
+      setSdkReady(true);
+      if (embedded) {
+        found.reportReady().catch(() => {});
       }
     });
-    setSdkReady(true);
-    if (embedded) {
-      sdk.reportReady().catch(() => {});
-    }
-    return unsubscribe;
-  }, [sdk, embedded]);
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [embedded]);
 
   const notify = (type: NotificationType) =>
     sdk?.showNotification(
