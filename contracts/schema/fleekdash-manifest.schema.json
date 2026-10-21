@@ -251,7 +251,7 @@
         "shape": {
           "type": "string",
           "enum": ["metric-cards", "table-rows", "time-series", "geo"],
-          "description": "Adapter projection contract for the endpoint response. `funnel` stays out of v1 - no widget surface binds ext-rest funnel sources."
+          "description": "Adapter projection contract for the endpoint response. `funnel` stays out of v1 — no widget surface binds ext-rest funnel sources."
         },
         "rest_route": {
           "type": "string",
