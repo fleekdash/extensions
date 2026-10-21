@@ -184,22 +184,24 @@ export interface FleekDashManifest {
   routes?: IntegrationRoute[];
 
   /**
-   * kind: app → native dashboard pages. Each entry provisions an
-   * AdminPage (schema-v3 blocks snapshot) rendered under
-   * `/app/<id>/<page-id>` by the dashboard core — no iframe needed.
+   * kind: app → native dashboard pages. On hosts that ship the page
+   * provisioner each entry becomes an AdminPage (schema-v3 blocks
+   * snapshot) rendered under `/app/<id>/<page-id>` — no iframe needed.
    * Absent = not page-managed; explicit [] prunes provisioned pages
-   * (same semantics as `routes`). JSON-only key: there is no
-   * imperative page API in v1 — the provisioner owns the lifecycle.
+   * (same semantics as `routes`). Older hosts validate the manifest
+   * but skip unmanaged keys, so declaring early is safe. JSON-only
+   * key: there is no imperative page API in v1.
    */
   pages?: ExtensionPage[];
 
   /**
    * kind: app → extension-owned REST resources that dashboard widgets
-   * bind to (ext-rest adapter). Each source declares the response
-   * shape the adapter projects onto; builtin connectors (wp-query
-   * resources like `wp.task`, stripe, overview) are bindable without
-   * declaration. Absent = no extension sources; explicit [] prunes
-   * registered sources.
+   * bind to (ext-rest adapter, on hosts that ship the data-source
+   * registry). Each source declares the response shape the adapter
+   * projects onto; builtin connectors (wp-query resources like
+   * `wp.task`, stripe, overview) are bindable without declaration.
+   * Absent = no extension sources; explicit [] prunes registered
+   * sources on provisioner hosts.
    */
   data_sources?: ExtensionDataSource[];
 }

@@ -11,6 +11,8 @@
  * adapter. Iframe routes stay on `routes[]` (see routes.ts).
  */
 
+import type { ManifestIcon } from "./manifest";
+
 /** Zones mirror AdminPageSanitizer::PLACEMENT_ZONES. */
 export type ExtensionPageZone = "none" | "dashboard" | "menu";
 
@@ -49,7 +51,7 @@ export interface ExtensionPage {
   id: string;
   /** Required - display title. */
   title: string;
-  icon?: string;
+  icon?: ManifestIcon;
   /** wp capability required to view the page (fails closed). */
   capability?: string;
   /** Absent → provisioner default (menu zone). */

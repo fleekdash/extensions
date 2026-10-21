@@ -194,7 +194,7 @@
           "pattern": "^[a-z0-9-]+$",
           "description": "Page slug; becomes the route segment /app/<ext-id>/<id> and the provisioned page identity."
         },
-        "title": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1, "pattern": "\\S" },
         "icon": { "$ref": "#/properties/icon" },
         "capability": {
           "type": "string",
@@ -247,7 +247,7 @@
           "pattern": "^ext\\.[a-z0-9][a-z0-9\\-]*\\.[a-z0-9-]+$",
           "description": "Namespaced resource id ext.<manifest-id>.<name>; the runtime validator also enforces the manifest-id prefix."
         },
-        "label": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1, "pattern": "\\S" },
         "shape": {
           "type": "string",
           "enum": ["metric-cards", "table-rows", "time-series", "geo", "funnel"],
@@ -255,8 +255,8 @@
         },
         "rest_route": {
           "type": "string",
-          "pattern": "^/[a-zA-Z0-9\\-_/]+$",
-          "description": "Site-relative REST path WITHOUT the /wp-json prefix (same form register_rest_route takes). GET only in v1."
+          "pattern": "^/(?!/)(?!.*\\.\\.)[a-zA-Z0-9\\-_/]+$",
+          "description": "Site-relative REST path WITHOUT the /wp-json prefix (same form register_rest_route takes). No leading // or .. segments — mirrors the host validator exactly. GET only in v1."
         },
         "queryGroups": {
           "type": "array",
@@ -282,7 +282,7 @@
             "additionalProperties": false,
             "properties": {
               "key": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-\\.]+$" },
-              "label": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1, "pattern": "\\S" },
               "type": {
                 "type": "string",
                 "pattern": "^[a-z0-9-]+$",
