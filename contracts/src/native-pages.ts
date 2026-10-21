@@ -61,13 +61,17 @@ export interface ExtensionPage {
   content: ExtensionPageContent;
 }
 
-/** Response shape the ext-rest adapter projects onto (mirrors ALLOWED_DATA_SOURCE_SHAPES). */
+/**
+ * Response shape the ext-rest adapter projects onto (mirrors
+ * ALLOWED_DATA_SOURCE_SHAPES). `funnel` stays out of v1: the funnel widget
+ * renders only the ecommerce funnel and never binds resource items, so an
+ * extension funnel source would be unbindable.
+ */
 export type ExtensionDataSourceShape =
   | "metric-cards"
   | "table-rows"
   | "time-series"
-  | "geo"
-  | "funnel";
+  | "geo";
 
 export interface ExtensionDataSourceColumn {
   /** Row object key the adapter reads (alphanumeric, `_-.`). */
