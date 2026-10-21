@@ -250,7 +250,13 @@
         "label": { "type": "string", "minLength": 1, "pattern": "\\S" },
         "shape": {
           "type": "string",
-          "enum": ["metric-cards", "table-rows", "time-series", "geo", "funnel"],
+          "enum": [
+            "metric-cards",
+            "table-rows",
+            "time-series",
+            "geo",
+            "funnel"
+          ],
           "description": "Adapter projection contract for the endpoint response."
         },
         "rest_route": {
@@ -293,7 +299,10 @@
         },
         "rowActions": {
           "type": "array",
-          "items": { "type": "string", "enum": ["view", "edit", "delete", "duplicate"] },
+          "items": {
+            "type": "string",
+            "enum": ["view", "edit", "delete", "duplicate"]
+          },
           "uniqueItems": true
         }
       }
