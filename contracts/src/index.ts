@@ -14,6 +14,18 @@ export type {
 export type { SandboxMode, IntegrationRoute, RegistryManifest } from "./routes";
 
 export type {
+  ExtensionPage,
+  ExtensionPageContent,
+  ExtensionPagePlacement,
+  ExtensionPageRoute,
+  ExtensionPageZone,
+  ExtensionDataSource,
+  ExtensionDataSourceColumn,
+  ExtensionDataSourceShape,
+  ExtensionRowAction,
+} from "./native-pages";
+
+export type {
   IntegrationMessageType,
   HostBroadcastType,
   SdkEventType,

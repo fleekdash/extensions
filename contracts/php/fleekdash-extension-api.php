@@ -80,5 +80,11 @@ if (false) {
 	 * appends the param automatically.
 	 * Call register() on activation/init and unregister() on deactivation.
 	 * Sandbox modes: 'strict' | 'moderate' | 'none'.
+	 *
+	 * JSON-only keys (no imperative writer): `pages` (native schema-v3
+	 * dashboard pages under /app/<id>/<page>) and `data_sources`
+	 * (extension-owned REST resources for widget bindings) are declared
+	 * exclusively in fleekdash.json on kind:app manifests - the host's
+	 * page provisioner and data-source registry own their lifecycle.
 	 */
 }

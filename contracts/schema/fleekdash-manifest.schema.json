@@ -171,9 +171,133 @@
       "type": "array",
       "description": "kind: app → declarative iframe routes; registered into the integration registry at runtime. component_url accepts a manifest-relative path, a site-relative path (/…), or an http(s) URL; fleekdash_sdk_url is appended automatically.",
       "items": { "$ref": "#/definitions/route" }
+    },
+    "pages": {
+      "type": "array",
+      "description": "kind: app → native dashboard pages. Each entry provisions an AdminPage (schema-v3 blocks snapshot) rendered under /app/<id>/<page-id>; explicit [] prunes provisioned pages. JSON-only key (no imperative page API in v1).",
+      "items": { "$ref": "#/definitions/page" }
+    },
+    "data_sources": {
+      "type": "array",
+      "description": "kind: app → extension-owned REST resources bound to dashboard widgets via the ext-rest adapter. Ids must be namespaced ext.<manifest-id>.<name>; explicit [] prunes registered sources.",
+      "items": { "$ref": "#/definitions/dataSource" }
     }
   },
   "definitions": {
+    "page": {
+      "type": "object",
+      "required": ["id", "title", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Page slug; becomes the route segment /app/<ext-id>/<id> and the provisioned page identity."
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "icon": { "$ref": "#/properties/icon" },
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_.\\-]{0,63}$",
+          "description": "wp capability required to view the page (fails closed)."
+        },
+        "placement": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Absent → provisioner default (menu zone). zone: menu = sidebar item, dashboard = dashboard tab, none = reachable only via its route.",
+          "properties": {
+            "zone": { "type": "string", "enum": ["none", "dashboard", "menu"] },
+            "order": { "type": "integer", "minimum": 0 },
+            "parentId": { "type": "string", "minLength": 1 }
+          }
+        },
+        "route": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "v1: only {\"type\": \"native\"} (fd-native schema-v3 page). Absent defaults to native.",
+          "properties": {
+            "type": { "type": "string", "enum": ["native"] }
+          }
+        },
+        "content": {
+          "type": "object",
+          "required": ["type", "config"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["blocks"],
+              "description": "v1: only \"blocks\" (DashboardPresetSnapshot, schema v3)."
+            },
+            "config": {
+              "type": "object",
+              "description": "Schema-v3 dashboard snapshot (sections + widgetPlacements …). Deep-normalized at provision time by AdminPageSanitizer."
+            }
+          }
+        }
+      }
+    },
+    "dataSource": {
+      "type": "object",
+      "required": ["id", "label", "shape", "rest_route"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^ext\\.[a-z0-9][a-z0-9\\-]*\\.[a-z0-9-]+$",
+          "description": "Namespaced resource id ext.<manifest-id>.<name>; the runtime validator also enforces the manifest-id prefix."
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "shape": {
+          "type": "string",
+          "enum": ["metric-cards", "table-rows", "time-series", "geo", "funnel"],
+          "description": "Adapter projection contract for the endpoint response."
+        },
+        "rest_route": {
+          "type": "string",
+          "pattern": "^/[a-zA-Z0-9\\-_/]+$",
+          "description": "Site-relative REST path WITHOUT the /wp-json prefix (same form register_rest_route takes). GET only in v1."
+        },
+        "queryGroups": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9\\-_:]+$" },
+          "description": "Query batching groups (lowercase slugs; colons allowed)."
+        },
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_.\\-]{0,63}$",
+          "description": "wp capability required to read the source (fails closed)."
+        },
+        "entity": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Entity-table renderer key for table-rows sources (e.g. \"task\")."
+        },
+        "columns": {
+          "type": "array",
+          "description": "Explicit column contract for table-rows (v1: no inference).",
+          "items": {
+            "type": "object",
+            "required": ["key", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "key": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-\\.]+$" },
+              "label": { "type": "string", "minLength": 1 },
+              "type": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "Rendering hint (e.g. \"date\", \"number\", \"badge\")."
+              }
+            }
+          }
+        },
+        "rowActions": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["view", "edit", "delete", "duplicate"] },
+          "uniqueItems": true
+        }
+      }
+    },
     "route": {
       "type": "object",
       "required": ["path", "title", "component_url"],
