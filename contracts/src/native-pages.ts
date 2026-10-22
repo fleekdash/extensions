@@ -20,16 +20,17 @@ export interface ExtensionPagePlacement {
   /**
    * "menu" injects a sidebar item; "dashboard" renders as a dashboard
    * tab; "none" keeps the page reachable only via its route.
+   * Omitted zone defaults to "menu" at runtime.
    */
-  zone: ExtensionPageZone;
+  zone?: ExtensionPageZone;
   /** Ordering weight within the zone; default 0. */
   order?: number;
   parentId?: string;
 }
 
 export interface ExtensionPageRoute {
-  /** v1: only "native" (fd-native schema-v3 page). */
-  type: "native";
+  /** v1: only "native" (fd-native schema-v3 page); defaults to "native". */
+  type?: "native";
 }
 
 export interface ExtensionPageContent {
@@ -77,11 +78,18 @@ export interface ExtensionDataSourceColumn {
   /** Row object key the adapter reads (alphanumeric, `_-.`). */
   key: string;
   label: string;
-  /** Rendering hint (e.g. "date", "number", "badge"); free-form slug. */
+  /**
+   * Cell format: text | number | currency | date | status | email |
+   * image | avatar | country | percent. Other values render as plain
+   * text (the registry only forwards known formats).
+   */
   type?: string;
 }
 
-/** Mirrors ALLOWED_ROW_ACTIONS. */
+/**
+ * Mirrors ALLOWED_ROW_ACTIONS. `duplicate` is valid manifest metadata
+ * but has no generic widget-shell action in v1 and drops out at render.
+ */
 export type ExtensionRowAction = "view" | "edit" | "delete" | "duplicate";
 
 export interface ExtensionDataSource {
@@ -101,7 +109,12 @@ export interface ExtensionDataSource {
    * GET only in v1.
    */
   rest_route: string;
-  /** Query batching groups (lowercase slugs, `:` allowed). */
+  /**
+   * Query batching groups (lowercase slugs, `:` allowed). Validated
+   * metadata only in v1: the runtime always derives one group
+   * `ext:<ext-id>:<source-name>` per source id, so declared groups have
+   * no effect yet.
+   */
   queryGroups?: string[];
   /** wp capability required to read the source (fails closed). */
   capability?: string;
@@ -110,7 +123,10 @@ export interface ExtensionDataSource {
    * shares the posts entity-table shape when the row contract matches.
    */
   entity?: string;
-  /** Explicit column contract for table-rows (v1: no inference). */
+  /**
+   * Explicit column contract for table-rows; when omitted the ext-rest
+   * projection derives columns from the first row's keys.
+   */
   columns?: ExtensionDataSourceColumn[];
   rowActions?: ExtensionRowAction[];
 }
