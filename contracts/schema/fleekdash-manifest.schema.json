@@ -275,7 +275,7 @@
         },
         "columns": {
           "type": "array",
-          "description": "Explicit column contract for table-rows (v1: no inference).",
+          "description": "Explicit column contract for table-rows; when omitted the ext-rest projection derives columns from the first row's keys.",
           "items": {
             "type": "object",
             "required": ["key", "label"],

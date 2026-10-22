@@ -110,7 +110,7 @@ export interface ExtensionDataSource {
    */
   rest_route: string;
   /**
-   * Query batching groups (lowercase slugs, `:` allowed). Validated
+   * Query batching groups (lowercase slugs; `-`, `_`, `:` allowed). Validated
    * metadata only in v1: the runtime always derives one group
    * `ext:<ext-id>:<source-name>` per source id, so declared groups have
    * no effect yet.
