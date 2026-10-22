@@ -116,6 +116,7 @@ export interface FleekDashSdk {
   getWordPressData(
     endpoint: string,
     params?: Record<string, string | number>,
+    signal?: AbortSignal,
   ): Promise<unknown>;
   /** POST/PUT/PATCH/DELETE via WP REST through the host's authenticated apiClient. */
   mutateWordPressData(
