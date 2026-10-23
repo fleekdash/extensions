@@ -13,7 +13,7 @@
   "requires": {
     "wp": "6.5",
     "php": "8.0",
-    "fleekdash": "2.6.7"
+    "fleekdash": "2.6.10"
   },
   "tags": ["tasks", "productivity", "reference", "sdk-demo"],
   "settings": {
