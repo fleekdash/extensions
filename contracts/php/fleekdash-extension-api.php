@@ -88,3 +88,37 @@ if (false) {
 	 * page provisioner and data-source registry own their lifecycle.
 	 */
 }
+
+if (false) {
+	/**
+	 * Vendored frontend libraries for hypermedia-first packs (htmx +
+	 * Alpine, no CDN). Views rendering text/html outside wp_head emit
+	 * script tags through this class instead of wp_enqueue_script.
+	 * Available on the host since FleekDash 2.6.10 (2.6.8/2.6.9 shipped
+	 * without it) - gate with class_exists() and declare
+	 * `requires.fleekdash` accordingly.
+	 *
+	 * Real calls:
+	 *
+	 *     FleekDash\Extension\ExtensionAssets::renderScriptTags( ['htmx', 'alpinejs'] );
+	 *     FleekDash\Extension\ExtensionAssets::renderLinkTags( [ FleekDash\Extension\ExtensionAssets::FLEEK_UI ] );
+	 *     FleekDash\Extension\ExtensionAssets::url( 'htmx' );
+	 *
+	 * Script handles: ExtensionAssets::HTMX ('htmx'), ExtensionAssets::ALPINE
+	 * ('alpinejs'); pinned versions live in ExtensionAssets::VERSIONS.
+	 * scriptTag($handle, $attrs) merges caller attrs over handle defaults
+	 * (Alpine defaults to defer) filtered by an allowlist - src, on* and
+	 * unknown names are dropped. scriptTags()/renderScriptTags() take a
+	 * list of handles and skip unknown ones.
+	 *
+	 * Stylesheet handles: ExtensionAssets::FLEEK_UI ('fleek-ui') - the
+	 * scoped Fleek UI bundle (theme tokens + utilities + fui-* classes +
+	 * the .fleek-ui base reset). linkTag($handle, $attrs) emits one
+	 * <link rel="stylesheet"> with the same allowlist filtering (rel/href
+	 * are never caller-settable); linkTags()/renderLinkTags() take a list
+	 * of handles and skip unknown ones. Hosts may carry a partial backport
+	 * that has renderLinkTags() without the handle constant, so gate with
+	 * defined( 'FleekDash\Extension\ExtensionAssets::FLEEK_UI' ) as well as
+	 * method_exists().
+	 */
+}

@@ -92,6 +92,57 @@ export interface ExtensionDataSourceColumn {
  */
 export type ExtensionRowAction = "view" | "edit" | "delete" | "duplicate";
 
+/** Mirrors MetricDomain / ALLOWED_METRIC_DOMAINS. */
+export type ExtensionMetricDomain =
+  | "content"
+  | "audience"
+  | "sales"
+  | "orders"
+  | "customers";
+
+/** Mirrors WidgetDataUnit / ALLOWED_METRIC_UNITS. */
+export type ExtensionMetricUnit =
+  | "count"
+  | "currency"
+  | "percentage"
+  | "seconds";
+
+/** Mirrors MetricDirection / ALLOWED_METRIC_DIRECTIONS. */
+export type ExtensionMetricDirection = "up" | "down" | "neutral";
+
+/** Mirrors MetricAggregation / ALLOWED_METRIC_AGGREGATIONS. */
+export type ExtensionMetricAggregation =
+  | "sum"
+  | "average"
+  | "ratio"
+  | "snapshot"
+  | "distinct";
+
+/**
+ * Semantic metric declaration on a data source (metric-cards and
+ * time-series shapes only): the source joins the metrics registry so
+ * cards, series and labels share one identity. Sources sharing one
+ * `id` merge bindings — a card source plus a series source can feed
+ * the same metric, mirroring builtin defs like "Revenue".
+ */
+export interface ExtensionDataSourceMetric {
+  /**
+   * Metric identity; defaults to the source id. Namespaced
+   * `ext.<manifest-id>.<name>` like source ids so extensions cannot
+   * squat on builtin or foreign metric ids. Declare the same id on
+   * two sources to bind one metric across shapes.
+   */
+  id?: string;
+  /** Picker grouping — mirrors MetricDomain. */
+  domain: ExtensionMetricDomain;
+  /** Value unit — also lands on the synthesized resource def. */
+  unit: ExtensionMetricUnit;
+  /** Which way is good — drives growth colouring. */
+  direction: ExtensionMetricDirection;
+  /** How values combine across buckets; client folding honors it. */
+  aggregation: ExtensionMetricAggregation;
+}
+
 export interface ExtensionDataSource {
   /**
    * Required - namespaced `ext.<manifest-id>.<name>` where <name> is a
@@ -129,4 +180,9 @@ export interface ExtensionDataSource {
    */
   columns?: ExtensionDataSourceColumn[];
   rowActions?: ExtensionRowAction[];
+  /**
+   * Semantic metric declaration — metric-cards and time-series
+   * sources only; the validator rejects it on other shapes.
+   */
+  metric?: ExtensionDataSourceMetric;
 }

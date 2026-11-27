@@ -97,6 +97,11 @@
       "type": "string",
       "pattern": "^[a-z0-9_-]+\\.php(\\?[a-zA-Z0-9_\\-=&%.\\/]*)?$"
     },
+    "wp_menu_slug": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_\\-\\.\\/]+$",
+      "description": "Registered wp-admin menu page slug — reachable at admin.php?page=<slug>. Allows plugin-file handles (dir/file.php)."
+    },
     "requires": {
       "type": "object",
       "additionalProperties": false,
@@ -266,7 +271,7 @@
         "capability": {
           "type": "string",
           "pattern": "^[a-zA-Z][a-zA-Z0-9_.\\-]{0,63}$",
-          "description": "wp capability required to read the source (fails closed)."
+          "description": "wp capability required to read the source (fails closed). The route-permission keywords public, authenticated and admin are also honored: no gate, logged-in user, and manage_options."
         },
         "entity": {
           "type": "string",
@@ -298,6 +303,39 @@
             "enum": ["view", "edit", "delete", "duplicate"]
           },
           "uniqueItems": true
+        },
+        "metric": {
+          "type": "object",
+          "required": ["domain", "unit", "direction", "aggregation"],
+          "additionalProperties": false,
+          "description": "Semantic metric declaration for metric-cards and time-series sources: the source joins the metrics registry so cards, series and labels share one identity. Sources sharing one metric id merge bindings — a card source plus a series source can feed the same metric.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^ext\\.[a-z0-9][a-z0-9\\-]*\\.[a-z0-9-]+$",
+              "description": "Metric identity; defaults to the source id. Namespaced like source ids so extensions cannot squat on builtin or foreign metric ids. Declare the same id on two sources to bind one metric across shapes."
+            },
+            "domain": {
+              "type": "string",
+              "enum": ["content", "audience", "sales", "orders", "customers"],
+              "description": "Picker grouping — mirrors MetricDomain."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["count", "currency", "percentage", "seconds"],
+              "description": "Value unit — mirrors WidgetDataUnit; also lands on the synthesized resource def for unit grouping."
+            },
+            "direction": {
+              "type": "string",
+              "enum": ["up", "down", "neutral"],
+              "description": "Which way is good — drives growth colouring."
+            },
+            "aggregation": {
+              "type": "string",
+              "enum": ["sum", "average", "ratio", "snapshot", "distinct"],
+              "description": "How values combine across buckets — mirrors MetricAggregation; client folding honors it."
+            }
+          }
         }
       }
     },
